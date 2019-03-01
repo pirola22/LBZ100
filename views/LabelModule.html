@@ -4,252 +4,82 @@
 			ng-model="modelobject.collapseUIGrid1"
 			ng-mousedown="modelobject.collapseUIGrid1=!modelobject.collapseUIGrid1">
 			<img class="h5-icon" ng-src="img/selection-icon.png"
-				title="{{::languageConstants.get('Heading')}}" alt="" />{{::languageConstants.get('Label Detail')}}
+				title="{{::languageConstants.get('Heading')}}" alt="" />{{::languageConstants.get('Hose Label Details')}}
 		</div>
 		<div style="clear: both">
 			<div class="table-responsive h5-padding-md">
 			<tr>
-				<th colspan="3" class="h5-padding-md-l h5-color-graphite-dark"><h4>{{::languageConstants.get('Label Details')}}</h4></th>
+				<th colspan="3" class="h5-padding-md-l h5-color-graphite-dark"><h4>{{::languageConstants.get('')}}</h4></th>
 			</tr>
 				<div class="row">
 					<div class="col-xs-12 col-sm-12 col-md-3">
 						<table class="inlineTable">
 							
 							<tr class="h5-color-graphite">
-								<td><h5>{{::languageConstants.get('MO no')}}</h5></td>
+								<td><h5>{{::languageConstants.get('Warehouse')}}</h5></td>
 								<td>:</td>
 								<td><input type="text" class="h5-input-xs"
 									ng-model="itemGroupModule.addItemGroup.ITGR"
 									name="ITGR" title="Item Group"></td>
 							</tr>
 							<tr class="h5-color-graphite">
-								<td><h5>{{::languageConstants.get('Warehouse')}}</h5></td>
-								<td>:</td>
-								<td><input type="text" class="h5-input-xs"
-									ng-model="itemGroupModule.addItemGroup.TCWQ"
-									name="ITGR" title="Item Group"></td>
-							</tr>
-							<tr class="h5-color-graphite">
-								<td><h5>{{::languageConstants.get('Item no')}}</h5></td>
+								<td><h5>{{::languageConstants.get('Item No')}}</h5></td>
 								<td>:</td>
 								<td><input type="text" class="h5-input-sm"
 									ng-model="itemGroupModule.addItemGroup.TX15"
 									name="ITGR" title="Item Group"></td>
 							</tr>
 							<tr class="h5-color-graphite">
-								<td><h5>{{::languageConstants.get('Pellet Cut')}}</h5></td>
-								<td>:</td>
-								<td><input type="text" class="h5-input-xs"
-									ng-model="itemGroupModule.addItemGroup.TX40"
-									name="ITGR" title="Item Group"></td>
-							</tr>
-							<tr class="h5-color-graphite">
-								<td><h5>{{::languageConstants.get('LBL Type')}}</h5></td>
-								<td>:</td>
-								<td><input type="text" class="h5-input-xs"
-									ng-model="itemGroupModule.addItemGroup.TX40"
-									name="ITGR" title="Item Group"></td>
-							</tr>
-							<tr class="h5-color-graphite">
-								<td><h5>{{::languageConstants.get('Lot no')}}</h5></td>
+								<td><h5>{{::languageConstants.get('Stock No')}}</h5></td>
 								<td>:</td>
 								<td><input type="text" class="h5-input-sm"
 									ng-model="itemGroupModule.addItemGroup.TX40"
-									name="ITGR" title="Item Group"></td>
-							</tr>
-							<tr class="h5-color-graphite">
-								<td><h5>{{::languageConstants.get('Gross Weight')}}</h5></td>
-								<td>:</td>
-								<td><input type="text" class="h5-input-xs"
-									ng-model="itemGroupModule.addItemGroup.TX40"
-									name="ITGR" title="Item Group"></td>
-							</tr>
-							<tr class="h5-color-graphite">
-								<td><h5>{{::languageConstants.get('Starting Box')}}</h5></td>
-								<td>:</td>
-								<td><input type="text" class="h5-input-xs"
-									ng-model="itemGroupModule.addItemGroup.TX40"
-									name="ITGR" title="Item Group"></td>
-							</tr>
-							<tr class="h5-color-graphite">
-								<td><h5>{{::languageConstants.get('#Boxes')}}</h5></td>
-								<td>:</td>
-								<td><input type="text" class="h5-input-xs"
-									ng-model="itemGroupModule.addItemGroup.TX40"
-									name="ITGR" title="Item Group"></td>
-							</tr>
-							<tr class="h5-color-graphite">
-								<td><h5>{{::languageConstants.get('MDS Warning')}}</h5></td>
-								<td>:</td>
-								<td><input type="text" class="h5-input-xs"
-									ng-model="itemGroupModule.addItemGroup.TX40"
-									name="ITGR" title="Item Group"></td>
-							</tr>
-						</table>
-					</div>
-					<div class="col-xs-12 col-sm-12 col-md-3">
-						<table class="inlineTable">
-							<tr>
-								<th colspan="3" class="h5-padding-md-l h5-color-graphite-dark"><h4>{{::languageConstants.get('')}}</h4></th>
-							</tr>
-							<tr class="h5-color-graphite">
-								<td><h5>{{::languageConstants.get('Net Weight')}}</h5></td>
-								<td>:</td>
-								<td><input type="text" class="h5-input-xs"
-									ng-model="itemGroupModule.addItemGroup.SECU"
-									name="ITGR" title="Item Group"></td>
-							</tr>
-							<tr class="h5-color-graphite">
-								<td><h5>{{::languageConstants.get('Descending')}}</h5></td>
-								<td>:</td>
-								<td><input type="text" class="h5-input-xs"
-									ng-model="itemGroupModule.addItemGroup.TECU"
-									name="ITGR" title="Item Group"></td>
-							</tr>
-							<tr class="h5-color-graphite">
-								<td><h5>{{::languageConstants.get('Labels per Box')}}</h5></td>
-								<td>:</td>
-								<td><input type="text" class="h5-input-xs"
-									ng-model="itemGroupModule.addItemGroup.SECU"
-									name="ITGR" title="Item Group"></td>
-							</tr>
-							<tr class="h5-color-graphite">
-								<td><h5>{{::languageConstants.get('Last Box')}}</h5></td>
-								<td>:</td>
-								<td><input type="text" class="h5-input-xs"
-									ng-model="itemGroupModule.addItemGroup.TECU"
-									name="ITGR" title="Item Group"></td>
-							</tr>
-						</table>
-					</div>
-					<div class="col-xs-12 col-sm-12 col-md-3">
-						<table class="inlineTable">
-							<tr>
-								<th colspan="3" class="h5-padding-md-l h5-color-graphite-dark"><h4>{{::languageConstants.get('')}}</h4></th>
-							</tr>
-							<tr class="h5-color-graphite">
-								<td><h5>{{::languageConstants.get('Work Center')}}</h5></td>
-								<td>:</td>
-								<td><input type="text" class="h5-input-xs"
-									ng-model="itemGroupModule.addItemGroup.TCWP"
 									name="ITGR" title="Item Group"></td>
 							</tr>
 							<tr class="h5-color-graphite">
 								<td><h5>{{::languageConstants.get('Description')}}</h5></td>
 								<td>:</td>
-								<td><input type="text" class="h5-input-sm"
-									ng-model="itemGroupModule.addItemGroup.TCWP"
-									name="ITGR" title="Item Group"></td>
-							</tr>
-							<tr class="h5-color-graphite">
-								<td><h5>{{::languageConstants.get('Trade Name')}}</h5></td>
-								<td>:</td>
-								<td><input type="text" class="h5-input-sm"
-									ng-model="itemGroupModule.addItemGroup.TCWP"
-									name="ITGR" title="Item Group"></td>
-							</tr>
-							<tr class="h5-color-graphite">
-								<td><h5>{{::languageConstants.get('Compound')}}</h5></td>
-								<td>:</td>
-								<td><input type="text" class="h5-input-sm"
-									ng-model="itemGroupModule.addItemGroup.TCWP"
-									name="ITGR" title="Item Group"></td>
-							</tr>
-							<tr class="h5-color-graphite">
-								<td><h5>{{::languageConstants.get('Color')}}</h5></td>
-								<td>:</td>
-								<td><input type="text" class="h5-input-sm"
-									ng-model="itemGroupModule.addItemGroup.TCWP"
-									name="ITGR" title="Item Group"></td>
-							</tr>
-							<tr class="h5-color-graphite">
-								<td><h5>{{::languageConstants.get('Mfg U/M')}}</h5></td>
-								<td>:</td>
-								<td><input type="text" class="h5-input-xs"
-									ng-model="itemGroupModule.addItemGroup.TCWP"
-									name="ITGR" title="Item Group"></td>
-							</tr>
-							<tr class="h5-color-graphite">
-								<td><h5>{{::languageConstants.get('Tare')}}</h5></td>
-								<td>:</td>
-								<td><input type="text" class="h5-input-xs"
-									ng-model="itemGroupModule.addItemGroup.TCWP"
-									name="ITGR" title="Item Group"></td>
-							</tr>
-							<tr class="h5-color-graphite">
-								<td><h5>{{::languageConstants.get('Additional Info')}}</h5></td>
-								<td>:</td>
-								<td><input type="text" class="h5-input-sm"
-									ng-model="itemGroupModule.addItemGroup.TCWP"
-									name="ITGR" title="Item Group"></td>
-							</tr>
-							<tr class="h5-color-graphite">
-								<td><h5>{{::languageConstants.get('Box Count')}}</h5></td>
-								<td>:</td>
-								<td><input type="text" class="h5-input-xs"
-									ng-model="itemGroupModule.addItemGroup.TCWP"
-									name="ITGR" title="Item Group"></td>
-							</tr>
-						</table>
-					</div>
-				</div>
-			</div>
-		</div>
-
-	</div>
-	<div class="panel {{theme.panel}}">
-		<div class="panel-heading h5-cursor-pointer"
-			ng-model="modelobject.collapseUIGrid1"
-			ng-mousedown="modelobject.collapseUIGrid1=!modelobject.collapseUIGrid1">
-			<img class="h5-icon" ng-src="img/selection-icon.png"
-				title="{{::languageConstants.get('Heading')}}" alt="" />{{::languageConstants.get('Customer Label Detail')}}
-		</div>
-		<div style="clear: both">
-			<div class="table-responsive h5-padding-md">
-			<tr>
-				<th colspan="3" class="h5-padding-md-l h5-color-graphite-dark"><h4>{{::languageConstants.get('Customer Label Details')}}</h4></th>
-			</tr>
-				<div class="row">
-					<div class="col-xs-12 col-sm-12 col-md-3">
-						<table class="inlineTable">
-							
-							<tr class="h5-color-graphite">
-								<td><h5>{{::languageConstants.get('Cust Order no')}}</h5></td>
-								<td>:</td>
-								<td><input type="text" class="h5-input-xs"
-									ng-model="itemGroupModule.addItemGroup.ITGR"
-									name="ITGR" title="Item Group"></td>
-							</tr>
-							<tr class="h5-color-graphite">
-								<td><h5>{{::languageConstants.get('Cust LBL Type')}}</h5></td>
-								<td>:</td>
-								<td><input type="text" class="h5-input-sm"
-									ng-model="itemGroupModule.addItemGroup.TX15"
-									name="ITGR" title="Item Group"></td>
-							</tr>
-							<tr class="h5-color-graphite">
-								<td><h5>{{::languageConstants.get('Customer')}}</h5></td>
-								<td>:</td>
-								<td><input type="text" class="h5-input-xs"
+								<td><input type="text" class="h5-input-md"
 									ng-model="itemGroupModule.addItemGroup.TX40"
 									name="ITGR" title="Item Group"></td>
 							</tr>
 							<tr class="h5-color-graphite">
-								<td><h5>{{::languageConstants.get('Customer Item no')}}</h5></td>
+								<td><h5>{{::languageConstants.get('Dimension')}}</h5></td>
 								<td>:</td>
 								<td><input type="text" class="h5-input-sm"
 									ng-model="itemGroupModule.addItemGroup.TX40"
 									name="ITGR" title="Item Group"></td>
 							</tr>
 							<tr class="h5-color-graphite">
-								<td><h5>{{::languageConstants.get('Cust PO')}}</h5></td>
+								<td><h5>{{::languageConstants.get('Length')}}</h5></td>
+								<td>:</td>
+								<td><input type="text" class="h5-input-xs"
+									ng-model="itemGroupModule.addItemGroup.TX40"
+									name="ITGR" title="Item Group"></td>
+							</tr>
+							<tr class="h5-color-graphite">
+								<td><h5>{{::languageConstants.get('Case')}}</h5></td>
+								<td>:</td>
+								<td><input type="text" class="h5-input-xs"
+									ng-model="itemGroupModule.addItemGroup.TX40"
+									name="ITGR" title="Item Group"></td>
+							</tr>
+							<tr class="h5-color-graphite">
+								<td><h5>{{::languageConstants.get('Pallets')}}</h5></td>
+								<td>:</td>
+								<td><input type="text" class="h5-input-xs"
+									ng-model="itemGroupModule.addItemGroup.TX40"
+									name="ITGR" title="Item Group"></td>
+							</tr>
+							<tr class="h5-color-graphite">
+								<td><h5>{{::languageConstants.get('UCC')}}</h5></td>
 								<td>:</td>
 								<td><input type="text" class="h5-input-sm"
 									ng-model="itemGroupModule.addItemGroup.TX40"
 									name="ITGR" title="Item Group"></td>
 							</tr>
 							<tr class="h5-color-graphite">
-								<td><h5>{{::languageConstants.get('Payer')}}</h5></td>
+								<td><h5>{{::languageConstants.get('# Labels')}}</h5></td>
 								<td>:</td>
 								<td><input type="text" class="h5-input-xs"
 									ng-model="itemGroupModule.addItemGroup.TX40"
@@ -263,37 +93,51 @@
 								<th colspan="3" class="h5-padding-md-l h5-color-graphite-dark"><h4>{{::languageConstants.get('')}}</h4></th>
 							</tr>
 							<tr class="h5-color-graphite">
-								<td><h5>{{::languageConstants.get('Ref Order Line')}}</h5></td>
+								<td><h5>{{::languageConstants.get('Production Date')}}</h5></td>
 								<td>:</td>
 								<td><input type="text" class="h5-input-xs"
 									ng-model="itemGroupModule.addItemGroup.SECU"
 									name="ITGR" title="Item Group"></td>
 							</tr>
 							<tr class="h5-color-graphite">
-								<td><h5>{{::languageConstants.get('Cust Label Only')}}</h5></td>
+								<td><h5>{{::languageConstants.get('Print Carton')}}</h5></td>
 								<td>:</td>
-								<td><input type="text" class="h5-input-xs"
+								<td><input type="checkbox" 
 									ng-model="itemGroupModule.addItemGroup.TECU"
 									name="ITGR" title="Item Group"></td>
 							</tr>
 							<tr class="h5-color-graphite">
-								<td><h5>{{::languageConstants.get('Customer Name')}}</h5></td>
+								<td><h5>{{::languageConstants.get('Customer')}}</h5></td>
 								<td>:</td>
 								<td><input type="text" class="h5-input-sm"
 									ng-model="itemGroupModule.addItemGroup.SECU"
 									name="ITGR" title="Item Group"></td>
 							</tr>
+						</table>
+					</div>
+					<div class="col-xs-12 col-sm-12 col-md-3">
+						<table class="inlineTable">
+							<tr>
+								<th colspan="3" class="h5-padding-md-l h5-color-graphite-dark"><h4>{{::languageConstants.get('')}}</h4></th>
+							</tr>
 							<tr class="h5-color-graphite">
-								<td><h5>{{::languageConstants.get('Cust Desc')}}</h5></td>
+								<td><h5>{{::languageConstants.get('Shift')}}</h5></td>
 								<td>:</td>
-								<td><input type="text" class="h5-input-md"
+								<td><input type="checkbox" 
 									ng-model="itemGroupModule.addItemGroup.TECU"
 									name="ITGR" title="Item Group"></td>
 							</tr>
 							<tr class="h5-color-graphite">
-								<td><h5>{{::languageConstants.get('CID')}}</h5></td>
+								<td><h5>{{::languageConstants.get('Print Pallet')}}</h5></td>
 								<td>:</td>
-								<td><input type="text" class="h5-input-sm"
+								<td><input type="checkbox"
+									ng-model="itemGroupModule.addItemGroup.TECU"
+									name="ITGR" title="Item Group"></td>
+							</tr>
+							<tr class="h5-color-graphite">
+								<td><h5>{{::languageConstants.get('Use Master GTIN')}}</h5></td>
+								<td>:</td>
+								<td><input type="checkbox" 
 									ng-model="itemGroupModule.addItemGroup.TECU"
 									name="ITGR" title="Item Group"></td>
 							</tr>
