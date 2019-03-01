@@ -75,8 +75,10 @@ module h5.application {
         
         public getPrintDescription(constant: string, key: string): ng.IPromise<M3.IMIResponse> {
             let requestData = {
+                DIVI: "",
                 STCO: constant,
-                STKY: key
+                STKY: key,
+                LNCD: ""
             }
             return this.restService.executeM3MIRestService("MDBREADMI", "GetCSYTAB00", requestData).then((val: M3.IMIResponse) => { return val; });
         }
