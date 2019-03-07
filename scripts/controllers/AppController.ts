@@ -161,10 +161,14 @@ module h5.application {
             this.scope.labelModule = {
                 reload: true,
                 transactionStatus: {
-                    labelDetails: false
+                    labelList: false,
+                    addLabel: false
 
                 },
-                labelDetails: []
+                labelList: [],
+                labelListGrid: {},
+                selectedLabelListRow: {},
+                addLabel: {}
             };
         }
 
@@ -188,7 +192,7 @@ module h5.application {
         private initUIGrids() {
             //Initialize the grid objects via gridService
             //this.scope.sampleModule.sampleGrid1 = this.gridService.getSampleGrid1();
-
+            this.scope.labelModule.labelListGrid = this.gridService.getLabelListGrid()
             this.initUIGridsOnRegisterApi();
         }
 
@@ -196,6 +200,30 @@ module h5.application {
         * Initialize UI Grid On Register API if required
         */
         private initUIGridsOnRegisterApi() {
+            
+            this.scope.labelModule.labelListGrid.onRegisterApi = (gridApi) => {
+                this.gridService.adjustGridHeight("labelListGrid", this.scope.labelModule.labelListGrid.data.length, 500);
+                gridApi.core.on.renderingComplete(this.scope, (handler: any) => { this.gridService.restoreGridState("labelListGrid", gridApi); });
+                gridApi.core.on.sortChanged(this.scope, (handler: any) => { this.gridService.saveGridState("labelListGrid", gridApi); });
+                gridApi.core.on.columnVisibilityChanged(this.scope, (handler: any) => { this.gridService.saveGridState("labelListGrid", gridApi); });
+                gridApi.core.on.filterChanged(this.scope, (handler: any) => { this.gridService.saveGridState("labelListGrid", gridApi); });
+                gridApi.colMovable.on.columnPositionChanged(this.scope, (handler: any) => { this.gridService.saveGridState("labelListGrid", gridApi); });
+                gridApi.colResizable.on.columnSizeChanged(this.scope, (handler: any) => { this.gridService.saveGridState("labelListGrid", gridApi); });
+                gridApi.cellNav.on.viewPortKeyDown(this.scope, (event: any) => {
+                    if ((event.keyCode === 67) && (event.ctrlKey || event.metaKey)) {
+                        let cells = gridApi.cellNav.getCurrentSelection();
+                        this.copyCellContentToClipBoard(cells);
+                    }
+                });
+                gridApi.selection.on.rowSelectionChanged(this.scope, (row: any) => {
+                    this.gridService.saveGridState("labelListGrid", gridApi);
+                    this.labelListRowSelected(row);
+                });
+                gridApi.selection.on.rowSelectionChangedBatch(this.scope, (row: any) => {
+                    this.gridService.saveGridState("labelListGrid", gridApi);
+                    //this.itemMasterListRowSelected(gridApi.selection.getSelectedRows());
+                });
+            }
         }
 
         /**
@@ -631,7 +659,7 @@ module h5.application {
                 }
                 if (category == "labelModule") {
                     //Reset data from the specific module or category
-                    this.scope.labelModule.labelDetails = [];
+                    this.scope.labelModule.labelList = [];
                 }                
             });
         }
@@ -840,24 +868,38 @@ module h5.application {
         * Load the ItemList (MITMAS)
         * @param company the company
         */
-        private loadLabelDetails(printer: string, user: string, media: string): void {
+        private loadlabelList(printer: string, user: string, media: string): void {
 
             this.scope.loadingData = true;
-            this.scope.labelModule.transactionStatus.labelDetails = true;
+            this.scope.labelModule.transactionStatus.labelList = true;
             this.appService.getPrinter1(printer, user, media).then((val: M3.IMIResponse) => {
-                this.scope.labelModule.labelDetails = val.items;
-                this.scope.labelModule.transactionStatus.labelDetails = false;
+                this.scope.labelModule.labelList = val.items;
+                this.scope.labelModule.labelListGrid.data = val.items; //added after adding the list
+                this.gridService.adjustGridHeight("labelListGrid", val.items.length, 1000) //added to adjust grid height
+                this.scope.labelModule.transactionStatus.labelList = false;
                 this.refreshTransactionStatus();
             }, (err: M3.IMIResponse) => {
-                this.scope.labelModule.transactionStatus.labelDetails = false;
+                this.scope.labelModule.transactionStatus.labelList = false;
                 this.refreshTransactionStatus();
                 let error = "API: " + err.program + "." + err.transaction + ", Input: " + JSON.stringify(err.requestData) + ", Error Code: " + err.errorCode;
                 this.showError(error, [err.errorMessage]);
                 this.scope.statusBar.push({ message: error + " " + err.errorMessage, statusBarMessageType: h5.application.MessageType.Error, timestamp: new Date() });
 
 
-            })
+            }).finally(() => {
+                this.refreshTransactionStatus();//must be in both statements IF NOT IN FINALLY
+            });
 
+        }
+        
+         private labelListRowSelected(selectedRow: any) {
+            console.log("selectedRow" + JSON.stringify(selectedRow.entity));
+            this.scope.labelModule.selectedLabelListRow = selectedRow.entity;
+            //this.scope.itemGroupModule.addItemGroup = angular.copy(this.scope.itemGroupModule.selectedItemGroupListRow);
+            this.scope.labelModule.addLabel = {
+                
+            };
+            
         }
 
 
@@ -871,7 +913,7 @@ module h5.application {
             if (reLoad) {
                 this.clearData(["labelModule"]);
                 let selectedWarehouse = this.scope.globalSelection.warehouse;
-                this.loadLabelDetails("TZLB92PF",userContext.m3User, "*PRT"); //added
+                this.loadlabelList("TZLB92PF",userContext.m3User, "*PRT"); //added
             }
 
             //Add functions calls / business logics below which are required when this module is requested to load by an user

@@ -3,9 +3,13 @@ module h5.application {
         
         reload: boolean;
         transactionStatus: {
-            labelDetails: boolean;
+            labelList: boolean;
+            addLabel: boolean;
             
         };
-        labelDetails: any;
+        labelList: any;
+        labelListGrid: IUIGrid;
+        selectedLabelListRow: any;
+        addLabel: any;
     }
 }
