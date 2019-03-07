@@ -8,9 +8,9 @@ var serveStatic = require('serve-static');
 var http = require("http");
 var https = require("https");
 
-var port = "8282"; // default web server port
+var port = "1511"; // default web server port
 var path = "."; // current directory
-var proxyPort = "8283"; // default proxy server port
+var proxyPort = "1510"; // default proxy server port
 var h5Server = "hermes.tac.com"; // H5 server
 var h5ServerPort = "25107"; // H5 Server port
 var h5Credentials = "pirola22:lector3"; //H5 User Credentials
