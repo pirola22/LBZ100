@@ -93,10 +93,10 @@ module h5.application {
         public getLabelListGrid(): IUIGrid{
             let labelListGrid: IUIGrid = angular.copy(this.baseGrid);
             let footerCellTemplateNumString = "<div class=\"ui-grid-cell-contents\" col-index=\"renderIndex\">Sum: {{ ( col.getAggregationValue() CUSTOM_FILTERS ) | number:2 }}</div>";//cell template enables the hyperlink
-            let gridLinkCellTemplate = "<div class=\"ui-grid-cell-contents\" title=\"TOOLTIP\"><span class=\"h5-link\" ng-click=\"grid.appScope.itemGroupModule.openItemGroupDetailModal(col.field, row.entity)\">{{COL_FIELD CUSTOM_FILTERS}}</span></div>";
+            //let gridLinkCellTemplate = "<div class=\"ui-grid-cell-contents\" title=\"TOOLTIP\"><span class=\"h5-link\" ng-click=\"grid.appScope.labelModule.openlabelDetailModal(col.field, row.entity)\">{{COL_FIELD CUSTOM_FILTERS}}</span></div>";
             labelListGrid.columnDefs = [// numbers, quantity and currency should be right justified - headerCellClass:"text-right", cellClass:"text-right"
-                { name: "WHLO", displayName: this.languageService.languageConstants.get('Warehouse'), enableCellEdit: false, cellTemplate: gridLinkCellTemplate },//cell edit false means you cant edit via uigrid
-                { name: "TX15", displayName: this.languageService.languageConstants.get('Name'), enableCellEdit: false, cellTemplate: gridLinkCellTemplate }
+                { name: "WHLO", displayName: this.languageService.languageConstants.get('Warehouse'), enableCellEdit: false },//, cellTemplate: gridLinkCellTemplate },//cell edit false means you cant edit via uigrid
+                { name: "TX15", displayName: this.languageService.languageConstants.get('Name'), enableCellEdit: false} //, cellTemplate: gridLinkCellTemplate }
             ];
             
             return labelListGrid;
