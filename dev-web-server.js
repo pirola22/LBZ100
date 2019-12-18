@@ -8,15 +8,15 @@ var serveStatic = require('serve-static');
 var http = require("http");
 var https = require("https");
 
-var port = "1511"; // default web server port
+var port = "8484"; // default web server port
 var path = "."; // current directory
-var proxyPort = "1510"; // default proxy server port
+var proxyPort = "8485"; // default proxy server port
 var h5Server = "hermes.tac.com"; // H5 server
 var h5ServerPort = "25107"; // H5 Server port
-var h5Credentials = "pirola22:lector3"; //H5 User Credentials
+var h5Credentials = "monchj12@tac:hubahubbl3"; //H5 User Credentials
 
-console.log('Starting web server at localhost:' + port + '/mne/apps/customh5application');
-connect().use('/mne/apps/customh5application', serveStatic(path)).listen(port);
+console.log('Starting web server at localhost:' + port + '/mne/apps/crz009');
+connect().use('/mne/apps/crz009', serveStatic(path)).listen(port);
 
 startProxyServerForRemoteM3(proxyPort, h5Server, h5ServerPort);
 

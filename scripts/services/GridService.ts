@@ -58,11 +58,27 @@ module h5.application {
         public getBaseGrid(): IUIGrid {
             return angular.copy(this.baseGrid);
         }
-
-       public adjustGridHeight(gridId: string, noOfRows: number, timeDelay: number) {
+        
+        public adjustGridHeight(gridId: string, noOfRows: number, timeDelay: number) {
             noOfRows = (noOfRows < 1 ? 1 : noOfRows);
             this.$timeout(() => {
                 let newHeight = noOfRows > 15 ? 600 : (150 + noOfRows * 30);
+                angular.element(document.getElementById(gridId)).css('height', newHeight + 'px');
+            }, timeDelay);
+        }
+        
+        public adjustMOGridHeight(gridId: string, noOfRows: number, timeDelay: number) {
+            noOfRows = (noOfRows < 1 ? 1 : noOfRows);
+            this.$timeout(() => {
+                let newHeight = noOfRows > 15 ? 450 : (150 + noOfRows * 30);
+                angular.element(document.getElementById(gridId)).css('height', newHeight + 'px');
+            }, timeDelay);
+        }
+
+       public adjustInventoryItemGridHeight(gridId: string, noOfRows: number, timeDelay: number) {
+            noOfRows = (noOfRows < 1 ? 1 : noOfRows);
+            this.$timeout(() => {
+                let newHeight = noOfRows > 15 ? 300 : (150 + noOfRows * 30);
                 angular.element(document.getElementById(gridId)).css('height', newHeight + 'px');
             }, timeDelay);
         }
@@ -82,7 +98,7 @@ module h5.application {
         }
 
         public clearGridStates() {
-            let gridIds = ["sampleGrid1", "labelListGrid"];
+            let gridIds = ["sampleGrid1", "MOLabelListGrid", "inventoryLabelListGrid"];
             gridIds.forEach((gridId: string) => {
                 this.storageService.removeLocalData('h5.app.appName.gridState.' + gridId);
             });
@@ -90,18 +106,53 @@ module h5.application {
         }
         
         
-        public getLabelListGrid(): IUIGrid{
-            let labelListGrid: IUIGrid = angular.copy(this.baseGrid);
+        public getMOListGrid(): IUIGrid{
+            let MOLabelListGrid: IUIGrid = angular.copy(this.baseGrid);
             let footerCellTemplateNumString = "<div class=\"ui-grid-cell-contents\" col-index=\"renderIndex\">Sum: {{ ( col.getAggregationValue() CUSTOM_FILTERS ) | number:2 }}</div>";//cell template enables the hyperlink
-            //let gridLinkCellTemplate = "<div class=\"ui-grid-cell-contents\" title=\"TOOLTIP\"><span class=\"h5-link\" ng-click=\"grid.appScope.labelModule.openlabelDetailModal(col.field, row.entity)\">{{COL_FIELD CUSTOM_FILTERS}}</span></div>";
-            labelListGrid.columnDefs = [// numbers, quantity and currency should be right justified - headerCellClass:"text-right", cellClass:"text-right"
-                { name: "WHLO", displayName: this.languageService.languageConstants.get('Warehouse'), enableCellEdit: false },//, cellTemplate: gridLinkCellTemplate },//cell edit false means you cant edit via uigrid
-                { name: "TX15", displayName: this.languageService.languageConstants.get('Name'), enableCellEdit: false} //, cellTemplate: gridLinkCellTemplate }
+            let gridLinkCellTemplate = "<div class=\"ui-grid-cell-contents\" title=\"TOOLTIP\"><span class=\"h5-link\" ng-click=\"grid.appScope.MOLabelModule.displayMOLabel(col.field, row.entity)\">{{COL_FIELD CUSTOM_FILTERS}}</span></div>";
+            MOLabelListGrid.columnDefs = [// numbers, quantity and currency should be right justified - headerCellClass:"text-right", cellClass:"text-right"
+                { name: "VHMFNO", displayName: this.languageService.languageConstants.get('MO no'), enableCellEdit: false , cellTemplate: gridLinkCellTemplate},//, cellTemplate: gridLinkCellTemplate },//cell edit false means you cant edit via uigrid
+                { name: "VHITNO", displayName: this.languageService.languageConstants.get('Item Number'), enableCellEdit: false}, //, cellTemplate: gridLinkCellTemplate }
+                { name: "MMITDS", displayName: this.languageService.languageConstants.get('Name'), enableCellEdit: false}, //, cellTemplate: gridLinkCellTemplate }    
+                { name: "VHORQT", displayName: this.languageService.languageConstants.get('Order Quantity'), enableCellEdit: false} //, cellTemplate: gridLinkCellTemplate }
+            
             ];
             
-            return labelListGrid;
+            return MOLabelListGrid;
         }
 
+        public getInventoryItemListGrid(): IUIGrid{
+            let inventoryItemListGrid: IUIGrid = angular.copy(this.baseGrid);
+            let footerCellTemplateNumString = "<div class=\"ui-grid-cell-contents\" col-index=\"renderIndex\">Sum: {{ ( col.getAggregationValue() CUSTOM_FILTERS ) | number:2 }}</div>";//cell template enables the hyperlink
+            let gridLinkCellTemplate = "<div class=\"ui-grid-cell-contents\" title=\"TOOLTIP\"><span class=\"h5-link\" ng-click=\"grid.appScope.inventoryLabelModule.displayInventoryItemLot(col.field, row.entity)\">{{COL_FIELD CUSTOM_FILTERS}}</span></div>";
+            inventoryItemListGrid.columnDefs = [// numbers, quantity and currency should be right justified - headerCellClass:"text-right", cellClass:"text-right"
+                { name: "MLITNO", displayName: this.languageService.languageConstants.get('Item Number'), enableCellEdit: false, cellTemplate: gridLinkCellTemplate },//, cellTemplate: gridLinkCellTemplate },//cell edit false means you cant edit via uigrid
+                { name: "MMITDS", displayName: this.languageService.languageConstants.get('Name'), enableCellEdit: false }, //, cellTemplate: gridLinkCellTemplate }
+                { name: "MLBANO", displayName: this.languageService.languageConstants.get('Lot'), enableCellEdit: false }, //, cellTemplate: gridLinkCellTemplate }    
+                { name: "MLWHSL", displayName: this.languageService.languageConstants.get('Location'), enableCellEdit: false }, //, cellTemplate: gridLinkCellTemplate }    
+                { name: "MLSTQT", displayName: this.languageService.languageConstants.get('Quantity'), enableCellEdit: false }, //, cellTemplate: gridLinkCellTemplate }
+                { name: "MLSTAS", displayName: this.languageService.languageConstants.get('Status Balance ID'), enableCellEdit: false }, //, cellTemplate: gridLinkCellTemplate }
+                { name: "MMUNMS", displayName: this.languageService.languageConstants.get('UOM'), enableCellEdit: false } //, cellTemplate: gridLinkCellTemplate }
+            ];
+
+            return inventoryItemListGrid;
+        }
+        
+        
+        public getInventoryItemLotListGrid(): IUIGrid{
+            let inventoryItemLotListGrid: IUIGrid = angular.copy(this.baseGrid);
+            let footerCellTemplateNumString = "<div class=\"ui-grid-cell-contents\" col-index=\"renderIndex\">Sum: {{ ( col.getAggregationValue() CUSTOM_FILTERS ) | number:2 }}</div>";//cell template enables the hyperlink
+            let gridLinkCellTemplate = "<div class=\"ui-grid-cell-contents\" title=\"TOOLTIP\"><span class=\"h5-link\" ng-click=\"grid.appScope.inventoryLabelModule.displayInventoryItemLabel(col.field, row.entity)\">{{COL_FIELD CUSTOM_FILTERS}}</span></div>";
+            inventoryItemLotListGrid.columnDefs = [// numbers, quantity and currency should be right justified - headerCellClass:"text-right", cellClass:"text-right"
+                { name: "REDA", displayName: this.languageService.languageConstants.get('Rect Date'), enableCellEdit: false , cellTemplate: gridLinkCellTemplate},//, cellTemplate: gridLinkCellTemplate },//cell edit false means you cant edit via uigrid
+                { name: "BREF", displayName: this.languageService.languageConstants.get('Lot ref 1'), enableCellEdit: false},//, cellTemplate: gridLinkCellTemplate },//cell edit false means you cant edit via uigrid
+                { name: "BRE2", displayName: this.languageService.languageConstants.get('Lot ref 2'), enableCellEdit: false}, //, cellTemplate: gridLinkCellTemplate }
+                { name: "RORN", displayName: this.languageService.languageConstants.get('Reference Order'), enableCellEdit: false }, //, cellTemplate: gridLinkCellTemplate }    
+                ];
+            
+            return inventoryItemLotListGrid;
+        }
+        
         public getSampleGrid1(): IUIGrid {
             let sampleGrid1: IUIGrid = angular.copy(this.baseGrid);
             sampleGrid1.columnDefs = [

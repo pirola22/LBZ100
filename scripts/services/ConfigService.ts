@@ -38,8 +38,10 @@ module h5.application {
 
     export interface IAppConfiguration {
         enableM3Authority?: boolean;
+        authorizedUser? : boolean;
         globalDateFormat?: string;
         searchQuery?: any;
+        
     }
 
     export class ConfigService {

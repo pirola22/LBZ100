@@ -66,6 +66,20 @@ var h5;
                     angular.element(document.getElementById(gridId)).css('height', newHeight + 'px');
                 }, timeDelay);
             };
+            GridService.prototype.adjustMOGridHeight = function (gridId, noOfRows, timeDelay) {
+                noOfRows = (noOfRows < 1 ? 1 : noOfRows);
+                this.$timeout(function () {
+                    var newHeight = noOfRows > 15 ? 450 : (150 + noOfRows * 30);
+                    angular.element(document.getElementById(gridId)).css('height', newHeight + 'px');
+                }, timeDelay);
+            };
+            GridService.prototype.adjustInventoryItemGridHeight = function (gridId, noOfRows, timeDelay) {
+                noOfRows = (noOfRows < 1 ? 1 : noOfRows);
+                this.$timeout(function () {
+                    var newHeight = noOfRows > 15 ? 300 : (150 + noOfRows * 30);
+                    angular.element(document.getElementById(gridId)).css('height', newHeight + 'px');
+                }, timeDelay);
+            };
             GridService.prototype.saveGridState = function (gridId, gridApi) {
                 var gridState = gridApi.saveState.save();
                 this.storageService.setLocalData('h5.app.appName.gridState.' + gridId, gridState);
@@ -80,10 +94,49 @@ var h5;
             };
             GridService.prototype.clearGridStates = function () {
                 var _this = this;
-                var gridIds = ["sampleGrid1"];
+                var gridIds = ["sampleGrid1", "MOLabelListGrid", "inventoryLabelListGrid"];
                 gridIds.forEach(function (gridId) {
                     _this.storageService.removeLocalData('h5.app.appName.gridState.' + gridId);
                 });
+            };
+            GridService.prototype.getMOListGrid = function () {
+                var MOLabelListGrid = angular.copy(this.baseGrid);
+                var footerCellTemplateNumString = "<div class=\"ui-grid-cell-contents\" col-index=\"renderIndex\">Sum: {{ ( col.getAggregationValue() CUSTOM_FILTERS ) | number:2 }}</div>";
+                var gridLinkCellTemplate = "<div class=\"ui-grid-cell-contents\" title=\"TOOLTIP\"><span class=\"h5-link\" ng-click=\"grid.appScope.MOLabelModule.displayMOLabel(col.field, row.entity)\">{{COL_FIELD CUSTOM_FILTERS}}</span></div>";
+                MOLabelListGrid.columnDefs = [
+                    { name: "VHMFNO", displayName: this.languageService.languageConstants.get('MO no'), enableCellEdit: false, cellTemplate: gridLinkCellTemplate },
+                    { name: "VHITNO", displayName: this.languageService.languageConstants.get('Item Number'), enableCellEdit: false },
+                    { name: "MMITDS", displayName: this.languageService.languageConstants.get('Name'), enableCellEdit: false },
+                    { name: "VHORQT", displayName: this.languageService.languageConstants.get('Order Quantity'), enableCellEdit: false }
+                ];
+                return MOLabelListGrid;
+            };
+            GridService.prototype.getInventoryItemListGrid = function () {
+                var inventoryItemListGrid = angular.copy(this.baseGrid);
+                var footerCellTemplateNumString = "<div class=\"ui-grid-cell-contents\" col-index=\"renderIndex\">Sum: {{ ( col.getAggregationValue() CUSTOM_FILTERS ) | number:2 }}</div>";
+                var gridLinkCellTemplate = "<div class=\"ui-grid-cell-contents\" title=\"TOOLTIP\"><span class=\"h5-link\" ng-click=\"grid.appScope.inventoryLabelModule.displayInventoryItemLot(col.field, row.entity)\">{{COL_FIELD CUSTOM_FILTERS}}</span></div>";
+                inventoryItemListGrid.columnDefs = [
+                    { name: "MLITNO", displayName: this.languageService.languageConstants.get('Item Number'), enableCellEdit: false, cellTemplate: gridLinkCellTemplate },
+                    { name: "MMITDS", displayName: this.languageService.languageConstants.get('Name'), enableCellEdit: false },
+                    { name: "MLBANO", displayName: this.languageService.languageConstants.get('Lot'), enableCellEdit: false },
+                    { name: "MLWHSL", displayName: this.languageService.languageConstants.get('Location'), enableCellEdit: false },
+                    { name: "MLSTQT", displayName: this.languageService.languageConstants.get('Quantity'), enableCellEdit: false },
+                    { name: "MLSTAS", displayName: this.languageService.languageConstants.get('Status Balance ID'), enableCellEdit: false },
+                    { name: "MMUNMS", displayName: this.languageService.languageConstants.get('UOM'), enableCellEdit: false }
+                ];
+                return inventoryItemListGrid;
+            };
+            GridService.prototype.getInventoryItemLotListGrid = function () {
+                var inventoryItemLotListGrid = angular.copy(this.baseGrid);
+                var footerCellTemplateNumString = "<div class=\"ui-grid-cell-contents\" col-index=\"renderIndex\">Sum: {{ ( col.getAggregationValue() CUSTOM_FILTERS ) | number:2 }}</div>";
+                var gridLinkCellTemplate = "<div class=\"ui-grid-cell-contents\" title=\"TOOLTIP\"><span class=\"h5-link\" ng-click=\"grid.appScope.inventoryLabelModule.displayInventoryItemLabel(col.field, row.entity)\">{{COL_FIELD CUSTOM_FILTERS}}</span></div>";
+                inventoryItemLotListGrid.columnDefs = [
+                    { name: "REDA", displayName: this.languageService.languageConstants.get('Rect Date'), enableCellEdit: false, cellTemplate: gridLinkCellTemplate },
+                    { name: "BREF", displayName: this.languageService.languageConstants.get('Lot ref 1'), enableCellEdit: false },
+                    { name: "BRE2", displayName: this.languageService.languageConstants.get('Lot ref 2'), enableCellEdit: false },
+                    { name: "RORN", displayName: this.languageService.languageConstants.get('Reference Order'), enableCellEdit: false },
+                ];
+                return inventoryItemLotListGrid;
             };
             GridService.prototype.getSampleGrid1 = function () {
                 var _this = this;

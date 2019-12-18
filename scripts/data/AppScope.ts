@@ -1,3 +1,4 @@
+
 module h5.application {
 
     interface ITheme {
@@ -73,16 +74,24 @@ module h5.application {
             selection: {
                 url: string;
             },
-            labelModule: {
+            MOLabelModule: {
+                url: string;
+            },
+            InventoryLabelModule: {
+                url: string;
+            },
+            errorModule: {
                 url: string;
             }
 
         };
         globalSelection: IGlobalSelection;
-        labelModule: ILabelModule;
+        MOLabelModule: IMOLabelModule;
+        inventoryLabelModule: IInventoryLabelModule;
         statusBar : IStatusBarObj[];
         statusBarIsCollapsed : boolean;
         statusBarVisible : boolean;
         hasValidlicense : boolean;
+        
     }
 }

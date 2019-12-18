@@ -56,7 +56,7 @@ var h5;
                     this.scope.showSideNavLabel = false;
                 }
                 else {
-                    this.scope.showSideNavLabel = true;
+                    this.scope.showSideNavLabel = false;
                 }
             };
             AppController.prototype.initApplication = function () {
@@ -74,6 +74,9 @@ var h5;
                     _this.initLanguage();
                     _this.initTheme();
                     _this.getUserContext();
+                    if (_this.scope.appConfig.authorizedUser) {
+                        _this.scope.showSideNavLabel = false;
+                    }
                     _this.initModule();
                 }, function (errorResponse) {
                     Odin.Log.error("Error while getting global configuration " + errorResponse);
@@ -121,53 +124,192 @@ var h5;
                 this.scope.views = {
                     h5Application: { url: "views/Application.html" },
                     selection: { url: "views/Selection.html" },
-                    labelModule: { url: "views/LabelModule.html" }
+                    MOLabelModule: { url: "views/MOLabelModule.html" },
+                    InventoryLabelModule: { url: "views/InventoryLabelModule.html" },
+                    errorModule: { url: "views/Error.html" }
                 };
                 this.scope.modules = [
-                    { moduleId: 1, activeIcon: 'SampleModule1.png', inactiveIcon: 'SampleModule1-na.png', heading: 'Item Module', content: this.scope.views.labelModule.url, active: true, available: true }
+                    { moduleId: 1, activeIcon: 'SampleModule1.png', inactiveIcon: 'SampleModule1-na.png', heading: 'MO Label Module', content: this.scope.views.MOLabelModule.url, active: true, available: true },
+                    { moduleId: 2, activeIcon: 'SampleModule1.png', inactiveIcon: 'SampleModule1-na.png', heading: 'Inventory Label Module', content: this.scope.views.InventoryLabelModule.url, active: true, available: true }
                 ];
                 this.scope.appConfig = {};
                 this.scope.userContext = new M3.UserContext();
                 this.scope["dateRef"] = new Date();
                 this.initGlobalSelection();
-                this.initLabelModule();
+                this.initMOLabelModule();
+                this.initInventoryLabelModule();
             };
             AppController.prototype.initGlobalSelection = function () {
                 this.scope.globalSelection = {
                     reload: true,
                     transactionStatus: {
                         warehouseList: false,
-                        facilityList: false,
                         printerData: false,
-                        printDescriptionData: false
+                        printer: false,
+                        MOList: false,
+                        MOLabel: false,
+                        inventoryItemList: false,
+                        inventoryItemLotList: false,
+                        inventoryLabel: false,
+                        item: false,
+                        defaultPrinter: false
                     },
                     warehouseList: [],
                     warehouse: {},
-                    facilityList: [],
-                    facility: {},
                     printerData: [],
                     printer: {},
-                    printDescriptionData: [],
-                    printDescription: {}
+                    defaultPrinter: {},
+                    MOList: [],
+                    MO: {},
+                    MOLabel: {},
+                    inventoryItemList: {},
+                    inventoryItemLotList: {},
+                    inventoryItem: {},
+                    inventoryLabel: {},
+                    item: {},
+                    printerExists: false
                 };
             };
-            AppController.prototype.initLabelModule = function () {
-                this.scope.labelModule = {
+            AppController.prototype.initMOLabelModule = function () {
+                this.scope.MOLabelModule = {
                     reload: true,
                     transactionStatus: {
-                        labelDetails: false
+                        facilityList: false,
+                        MOList: false,
+                        sfx: false,
+                        itemAltWeight: false,
+                        tradeNames: false,
+                        workCenters: false,
+                        labelTypeList: false
                     },
-                    labelDetails: []
+                    facilityList: [],
+                    facility: {},
+                    MOList: [],
+                    MOListGrid: {},
+                    selectedMOLabelListRow: {},
+                    selectedMOLabelItem: {},
+                    labelTypeList: {},
+                    labelType: {},
+                    tradeNames: {},
+                    workCenters: {},
+                    workCenter: {},
+                    tradeName: {},
+                    printMOLabel: {},
+                    MOLabelExists: false,
+                    suffixExists: false,
+                    sfx: {},
+                    itemAltWeight: {},
+                    netNotLargerThanGross: false
+                };
+            };
+            AppController.prototype.initInventoryLabelModule = function () {
+                this.scope.inventoryLabelModule = {
+                    reload: true,
+                    transactionStatus: {
+                        warehouseList: false,
+                        InventoryList: false,
+                        sfx: false,
+                        itemAltWeight: false,
+                        inventoryLabel: false
+                    },
+                    warehouseList: [],
+                    warehouse: {},
+                    itemNumber: {},
+                    location: {},
+                    inventoryItemList: [],
+                    inventoryItemListGrid: {},
+                    selectedInventoryItemListRow: {},
+                    selectedInventoryItem: {},
+                    inventoryItemLotList: [],
+                    inventoryItemLotListGrid: {},
+                    selectedInventoryItemLotListRow: {},
+                    selectedInventoryItemLot: {},
+                    printInventoryLabel: {},
+                    inventoryLabelExists: false,
+                    suffixExists: false,
+                    sfx: {},
+                    itemAltWeight: {}
                 };
             };
             AppController.prototype.initApplicationConstants = function () {
             };
             AppController.prototype.initScopeFunctions = function () {
+                var _this = this;
+                this.scope.MOLabelModule.displayMOLabel = function (fieldName, rowEntity) { _this.displayMOLabel(fieldName, rowEntity); };
+                this.scope.inventoryLabelModule.displayInventoryItemLot = function (fieldName, rowEntity) { _this.displayInventoryItemLot(fieldName, rowEntity); };
+                this.scope.inventoryLabelModule.displayInventoryItemLabel = function (fieldName, rowEntity) { _this.displayInventoryItemLabel(fieldName, rowEntity); };
             };
             AppController.prototype.initUIGrids = function () {
+                this.scope.MOLabelModule.MOListGrid = this.gridService.getMOListGrid();
+                this.scope.inventoryLabelModule.inventoryItemListGrid = this.gridService.getInventoryItemListGrid();
+                this.scope.inventoryLabelModule.inventoryItemLotListGrid = this.gridService.getInventoryItemLotListGrid();
                 this.initUIGridsOnRegisterApi();
             };
             AppController.prototype.initUIGridsOnRegisterApi = function () {
+                var _this = this;
+                this.scope.MOLabelModule.MOListGrid.onRegisterApi = function (gridApi) {
+                    _this.gridService.adjustMOGridHeight("MOListGrid", _this.scope.MOLabelModule.MOListGrid.data.length, 500);
+                    gridApi.core.on.renderingComplete(_this.scope, function (handler) { _this.gridService.restoreGridState("MOListGrid", gridApi); });
+                    gridApi.core.on.sortChanged(_this.scope, function (handler) { _this.gridService.saveGridState("MOListGrid", gridApi); });
+                    gridApi.core.on.columnVisibilityChanged(_this.scope, function (handler) { _this.gridService.saveGridState("MOListGrid", gridApi); });
+                    gridApi.core.on.filterChanged(_this.scope, function (handler) { _this.gridService.saveGridState("MOListGrid", gridApi); });
+                    gridApi.colMovable.on.columnPositionChanged(_this.scope, function (handler) { _this.gridService.saveGridState("MOListGrid", gridApi); });
+                    gridApi.colResizable.on.columnSizeChanged(_this.scope, function (handler) { _this.gridService.saveGridState("MOListGrid", gridApi); });
+                    gridApi.cellNav.on.viewPortKeyDown(_this.scope, function (event) {
+                        if ((event.keyCode === 67) && (event.ctrlKey || event.metaKey)) {
+                            var cells = gridApi.cellNav.getCurrentSelection();
+                            _this.copyCellContentToClipBoard(cells);
+                        }
+                    });
+                    gridApi.selection.on.rowSelectionChanged(_this.scope, function (row) {
+                        _this.gridService.saveGridState("MOListGrid", gridApi);
+                    });
+                    gridApi.selection.on.rowSelectionChangedBatch(_this.scope, function (row) {
+                        _this.gridService.saveGridState("MOListGrid", gridApi);
+                    });
+                };
+                this.scope.inventoryLabelModule.inventoryItemListGrid.onRegisterApi = function (gridApi) {
+                    _this.gridService.adjustInventoryItemGridHeight("inventoryItemListGrid", _this.scope.inventoryLabelModule.inventoryItemListGrid.data.length, 500);
+                    gridApi.core.on.renderingComplete(_this.scope, function (handler) { _this.gridService.restoreGridState("inventoryItemListGrid", gridApi); });
+                    gridApi.core.on.sortChanged(_this.scope, function (handler) { _this.gridService.saveGridState("inventoryItemListGrid", gridApi); });
+                    gridApi.core.on.columnVisibilityChanged(_this.scope, function (handler) { _this.gridService.saveGridState("inventoryItemListGrid", gridApi); });
+                    gridApi.core.on.filterChanged(_this.scope, function (handler) { _this.gridService.saveGridState("inventoryItemListGrid", gridApi); });
+                    gridApi.colMovable.on.columnPositionChanged(_this.scope, function (handler) { _this.gridService.saveGridState("inventoryItemListGrid", gridApi); });
+                    gridApi.colResizable.on.columnSizeChanged(_this.scope, function (handler) { _this.gridService.saveGridState("inventoryItemListGrid", gridApi); });
+                    gridApi.cellNav.on.viewPortKeyDown(_this.scope, function (event) {
+                        if ((event.keyCode === 67) && (event.ctrlKey || event.metaKey)) {
+                            var cells = gridApi.cellNav.getCurrentSelection();
+                            _this.copyCellContentToClipBoard(cells);
+                        }
+                    });
+                    gridApi.selection.on.rowSelectionChanged(_this.scope, function (row) {
+                        _this.gridService.saveGridState("inventoryItemListGrid", gridApi);
+                    });
+                    gridApi.selection.on.rowSelectionChangedBatch(_this.scope, function (row) {
+                        _this.gridService.saveGridState("inventoryItemListGrid", gridApi);
+                    });
+                };
+                this.scope.inventoryLabelModule.inventoryItemLotListGrid.onRegisterApi = function (gridApi) {
+                    _this.gridService.adjustInventoryItemGridHeight("inventoryItemLotListGrid", _this.scope.inventoryLabelModule.inventoryItemLotListGrid.data.length, 500);
+                    gridApi.core.on.renderingComplete(_this.scope, function (handler) { _this.gridService.restoreGridState("inventoryItemLotListGrid", gridApi); });
+                    gridApi.core.on.sortChanged(_this.scope, function (handler) { _this.gridService.saveGridState("inventoryItemLotListGrid", gridApi); });
+                    gridApi.core.on.columnVisibilityChanged(_this.scope, function (handler) { _this.gridService.saveGridState("inventoryItemLotListGrid", gridApi); });
+                    gridApi.core.on.filterChanged(_this.scope, function (handler) { _this.gridService.saveGridState("inventoryItemLotListGrid", gridApi); });
+                    gridApi.colMovable.on.columnPositionChanged(_this.scope, function (handler) { _this.gridService.saveGridState("inventoryItemLotListGrid", gridApi); });
+                    gridApi.colResizable.on.columnSizeChanged(_this.scope, function (handler) { _this.gridService.saveGridState("inventoryItemLotListGrid", gridApi); });
+                    gridApi.cellNav.on.viewPortKeyDown(_this.scope, function (event) {
+                        if ((event.keyCode === 67) && (event.ctrlKey || event.metaKey)) {
+                            var cells = gridApi.cellNav.getCurrentSelection();
+                            _this.copyCellContentToClipBoard(cells);
+                        }
+                    });
+                    gridApi.selection.on.rowSelectionChanged(_this.scope, function (row) {
+                        _this.gridService.saveGridState("inventoryItemLotListGrid", gridApi);
+                    });
+                    gridApi.selection.on.rowSelectionChangedBatch(_this.scope, function (row) {
+                        _this.gridService.saveGridState("inventoryItemLotListGrid", gridApi);
+                    });
+                };
             };
             AppController.prototype.resetUIGridsColumnDefs = function () {
             };
@@ -315,6 +457,26 @@ var h5;
                 hiddenTextArea.val(textToCopy);
                 hiddenTextArea.select();
             };
+            AppController.prototype.openMOLabelModal = function () {
+                var options = {
+                    animation: true,
+                    templateUrl: "views/MOLabelModal.html",
+                    size: "lg",
+                    scope: this.scope,
+                    backdrop: "static"
+                };
+                this.scope.modalWindow = this.$uibModal.open(options);
+            };
+            AppController.prototype.openInventoryLabelModal = function () {
+                var options = {
+                    animation: true,
+                    templateUrl: "views/InventoryLabelModal.html",
+                    size: "lg",
+                    scope: this.scope,
+                    backdrop: "static"
+                };
+                this.scope.modalWindow = this.$uibModal.open(options);
+            };
             AppController.prototype.openAboutPage = function () {
                 var options = {
                     animation: true,
@@ -397,6 +559,10 @@ var h5;
                 this.showError(error, errorMessages);
                 this.scope.statusBar.push({ message: error + " " + errorMessages, statusBarMessageType: h5.application.MessageType.Error, timestamp: new Date() });
             };
+            AppController.prototype.openDatepicker = function () {
+                this.scope.globalSelection.inventoryLabel.REDAOpen = true;
+            };
+            ;
             AppController.prototype.showError = function (error, errorMessages) {
                 var _this = this;
                 this.scope["hasError"] = true;
@@ -450,28 +616,48 @@ var h5;
                 var userContext = this.scope.userContext;
                 var globalConfig = this.scope.globalConfig;
                 this.loadAppConfig(userContext.company, userContext.division, userContext.m3User, globalConfig.environment).then(function (val) {
-                    _this.loadPrinter("TZLB92PF", userContext.m3User, "*PRT");
-                    _this.loadWarehouseList(userContext.company);
-                    _this.loadFacilityList(userContext.company, userContext.division);
-                    _this.loadData(_this.scope.activeModule);
-                    _this.loadDefaultFields();
-                    _this.hideWarning();
+                    if (_this.scope.appConfig.authorizedUser === true) {
+                        console.log("authorized");
+                        _this.loadPrinterList();
+                        _this.loadWarehouseList(userContext.company);
+                        _this.getPrinter(userContext.m3User);
+                        _this.loadData(_this.scope.activeModule);
+                        _this.loadDefaultFields();
+                        _this.hideWarning();
+                    }
+                    else {
+                        console.log("NOT authorized");
+                        window.alert("NOT Authorized, Please Contact Security");
+                    }
                 });
             };
             AppController.prototype.loadDefaultFields = function () {
                 var userContext = this.scope.userContext;
                 var appConfig = this.scope.appConfig;
-                var printer = angular.isString(appConfig.searchQuery.printer) ? appConfig.searchQuery.printer : undefined;
-                var warehouse = angular.isString(appConfig.searchQuery.whlo) ? appConfig.searchQuery.whlo : userContext.WHLO;
+                console.log(" loadDefaultFields this.scope.globalSelection.defaultPrinter >>>>>>>>>>>>>user " + this.scope.globalSelection.defaultPrinter);
                 var facility = angular.isString(appConfig.searchQuery.faci) ? appConfig.searchQuery.faci : userContext.FACI;
-                this.scope.globalSelection.printer = { selected: printer };
-                this.scope.globalSelection.warehouse = { selected: warehouse };
-                this.scope.globalSelection.facility = { selected: facility };
+                this.scope.MOLabelModule.facility = { selected: facility };
+                this.loadFacilityList(userContext.company, userContext.division);
+                var warehouse = angular.isString(appConfig.searchQuery.whlo) ? appConfig.searchQuery.whlo : userContext.WHLO;
+                this.scope.inventoryLabelModule.warehouse = { selected: warehouse };
+                this.loadWarehouseList(userContext.company);
             };
             AppController.prototype.loadApplicationData = function () {
-                var categories = ['globalSelection', 'labelModule'];
+                console.log("loadApplicationData------- ->>>>>>>>>>>>>  ");
+                var categories = ['globalSelection', 'MOLabelModule'];
                 this.clearData(categories);
                 this.resetReloadStatus();
+                this.getPrinter(this.scope.userContext.m3User);
+                var userPrinter = this.scope.globalSelection.defaultPrinter;
+                var selectedPrinter = this.scope.globalSelection.printer.selected.DEV;
+                if ((userPrinter === "")) {
+                    console.log("I DO NOT HAVE A PRINTER------------------------------------>>>>>>>>>>>>>  " + selectedPrinter);
+                }
+                else {
+                    console.log("I HAVE A PRINTER------------------------------------>>>>>>>>>>>>>  " + userPrinter);
+                }
+                console.log("userPrinter ------------------------------------>>>>>>>>>>>>>  " + userPrinter);
+                console.log("selectedPrinter ------------------------------------>>>>>>>>>>>>>  " + selectedPrinter);
                 this.loadData(this.scope.activeModule);
             };
             AppController.prototype.clearData = function (categories) {
@@ -479,13 +665,17 @@ var h5;
                 categories.forEach(function (category) {
                     if (category == "globalSelection") {
                     }
-                    if (category == "labelModule") {
-                        _this.scope.labelModule.labelDetails = [];
+                    if (category == "MOLabelModule") {
+                        _this.scope.MOLabelModule.MOList = [];
+                    }
+                    if (category == "inventoryLabelModule") {
+                        _this.scope.inventoryLabelModule.inventoryItemList = [];
                     }
                 });
             };
             AppController.prototype.resetReloadStatus = function () {
-                this.scope.labelModule.reload = true;
+                this.scope.MOLabelModule.reload = true;
+                this.scope.inventoryLabelModule.reload = true;
             };
             AppController.prototype.moduleSelected = function (moduleId) {
                 this.scope.activeModule = moduleId;
@@ -504,9 +694,10 @@ var h5;
                 this.refreshTransactionStatus();
                 switch (activeModule) {
                     case 1:
-                        this.loadlabelModule(this.scope.labelModule.reload);
+                        this.loadMOLabelModule(this.scope.MOLabelModule.reload);
                         break;
                     case 2:
+                        this.loadInventoryLabelModule(this.scope.inventoryLabelModule.reload);
                         break;
                     case 3:
                         break;
@@ -515,6 +706,7 @@ var h5;
                 }
             };
             AppController.prototype.refreshTransactionStatus = function () {
+                console.log("refreshTransactionStatus ");
                 var isLoading = false;
                 for (var transaction in this.scope.transactionStatus) {
                     var value = this.scope.transactionStatus[transaction];
@@ -536,8 +728,8 @@ var h5;
                 }
                 switch (this.scope.activeModule) {
                     case 1:
-                        for (var transaction in this.scope.labelModule.transactionStatus) {
-                            var value = this.scope.labelModule.transactionStatus[transaction];
+                        for (var transaction in this.scope.MOLabelModule.transactionStatus) {
+                            var value = this.scope.MOLabelModule.transactionStatus[transaction];
                             if (value == true) {
                                 isLoading = true;
                                 break;
@@ -558,10 +750,13 @@ var h5;
                 var deferred = this.$q.defer();
                 this.scope.appConfig = this.scope.globalConfig.appConfig;
                 this.scope.appConfig.searchQuery = this.$location.search();
+                this.scope.appConfig.enableM3Authority = true;
                 if (this.scope.appConfig.enableM3Authority) {
                     this.scope.loadingData = true;
                     this.scope.transactionStatus.appConfig = true;
-                    var promise1 = this.appService.getAuthority(company, division, user, "CRS610", 1).then(function (result) {
+                    var programName = "LBZ100";
+                    var promise1 = this.appService.getAuthority(company, division, user, programName, 1).then(function (result) {
+                        _this.scope.appConfig.authorizedUser = result;
                     });
                     var promises = [promise1];
                     this.$q.all(promises).finally(function () {
@@ -575,14 +770,34 @@ var h5;
                 }
                 return deferred.promise;
             };
-            AppController.prototype.loadPrinter = function (printer, user, media) {
+            AppController.prototype.filterZSYTAB = function (fileName, val) {
+                var filteredValues = [];
+                val.items.forEach(function (value) {
+                    if (value.KPID === fileName) {
+                        filteredValues.push(value);
+                    }
+                });
+                return filteredValues;
+            };
+            AppController.prototype.filterList = function (filterString, val) {
+                console.log("console.log(filteredValues.items);------------------------------------->>>>>>>>>>>>>>" + filterString);
+                var filteredValues = [];
+                val.items.forEach(function (value) {
+                    if (value.ITNO === filterString) {
+                        filteredValues.push(value);
+                    }
+                });
+                return filteredValues;
+            };
+            AppController.prototype.loadPrinterList = function () {
                 var _this = this;
                 this.scope.loadingData = true;
                 this.scope.globalSelection.transactionStatus.printerData = true;
-                this.appService.getPrinter(printer, user, media).then(function (val) {
+                this.appService.lstPrinters().then(function (val) {
                     _this.scope.globalSelection.printerData = val.items;
-                    _this.loadPrintDescription("DEV", "RI1PRT80");
+                    _this.scope.globalSelection.printer.selected = val.items[0];
                     _this.scope.globalSelection.transactionStatus.printerData = false;
+                    _this.scope.globalSelection.printerExists = true;
                     _this.refreshTransactionStatus();
                 }, function (err) {
                     _this.scope.globalSelection.transactionStatus.printerData = false;
@@ -592,32 +807,135 @@ var h5;
                     _this.scope.statusBar.push({ message: error + " " + err.errorMessage, statusBarMessageType: h5.application.MessageType.Error, timestamp: new Date() });
                 });
             };
-            AppController.prototype.loadPrintDescription = function (constant, key) {
+            AppController.prototype.getPrinter = function (user) {
+                var _this = this;
+                var printer = "";
+                this.appService.getUserPrinter(user).then(function (val1) {
+                    _this.scope.globalSelection.defaultPrinter = val1.items[0].DEV + "";
+                    _this.scope.globalSelection.printer.selected = val1.items[0].DEV + "";
+                    _this.scope.globalSelection.transactionStatus.defaultPrinter = false;
+                    _this.refreshTransactionStatus();
+                    printer = val1.item.DEV;
+                }, function (err) {
+                    _this.appService.addPrintFile(user, "").then(function (val) {
+                        console.log("------------------------------I ADDED PRINTER " + printer);
+                    }, function (err) {
+                        var error = "API: " + err.program + "." + err.transaction + ", Error Code: " + err.errorCode;
+                        _this.showError(error, [err.errorMessage]);
+                        _this.refreshTransactionStatus();
+                    });
+                });
+                return printer;
+            };
+            AppController.prototype.loadMOList = function (facility) {
                 var _this = this;
                 this.scope.loadingData = true;
-                this.scope.globalSelection.printDescriptionData = true;
-                this.appService.getPrintDescription(constant, key).then(function (val) {
-                    _this.scope.globalSelection.printDescriptionData = val.items;
-                    _this.scope.globalSelection.transactionStatus.printDescriptionData = false;
+                this.scope.globalSelection.MOList = true;
+                this.appService.getMOList(facility).then(function (val) {
+                    _this.scope.globalSelection.MOList = val.items;
+                    _this.scope.MOLabelModule.MOListGrid.data = val.items;
+                    _this.gridService.adjustMOGridHeight("MOListGrid", val.items.length, 1000);
+                    _this.scope.globalSelection.transactionStatus.MOList = false;
                     _this.refreshTransactionStatus();
                 }, function (err) {
-                    _this.scope.globalSelection.transactionStatus.printDescriptionData = false;
+                    _this.scope.globalSelection.transactionStatus.MOList = false;
                     _this.refreshTransactionStatus();
                     var error = "API: " + err.program + "." + err.transaction + ", Input: " + JSON.stringify(err.requestData) + ", Error Code: " + err.errorCode;
                     _this.showError(error, [err.errorMessage]);
                     _this.scope.statusBar.push({ message: error + " " + err.errorMessage, statusBarMessageType: h5.application.MessageType.Error, timestamp: new Date() });
                 });
+            };
+            AppController.prototype.loadInventoryItemList = function (warehouse) {
+                var _this = this;
+                console.log(warehouse);
+                this.scope.loadingData = true;
+                this.scope.globalSelection.inventoryItemList = true;
+                this.appService.getInventoryItemList(warehouse).then(function (val) {
+                    _this.scope.globalSelection.inventoryItemList = val.items;
+                    console.log(val.items);
+                    _this.scope.inventoryLabelModule.inventoryItemListGrid.data = val.items;
+                    _this.gridService.adjustInventoryItemGridHeight("inventoryItemListGrid", val.items.length, 500);
+                    _this.scope.globalSelection.transactionStatus.inventoryItemList = false;
+                    _this.refreshTransactionStatus();
+                }, function (err) {
+                    _this.scope.globalSelection.transactionStatus.inventoryItemList = false;
+                    _this.refreshTransactionStatus();
+                    var error = "API: " + err.program + "." + err.transaction + ", Input: " + JSON.stringify(err.requestData) + ", Error Code: " + err.errorCode;
+                    _this.showError(error, [err.errorMessage]);
+                    _this.scope.statusBar.push({ message: error + " " + err.errorMessage, statusBarMessageType: h5.application.MessageType.Error, timestamp: new Date() });
+                });
+            };
+            AppController.prototype.loadInventoryItemLotList = function (itemNumber) {
+                var _this = this;
+                console.log(itemNumber);
+                this.scope.loadingData = true;
+                this.scope.globalSelection.inventoryItemLotList = true;
+                this.appService.getInventoryItemLotList(itemNumber).then(function (val) {
+                    var filteredValues = _this.filterList(itemNumber, val);
+                    _this.scope.globalSelection.inventoryItemLotList = val.items;
+                    console.log("console.log(filteredValues.items);------------------------------------->>>>>>>>>>>>>>" + itemNumber);
+                    console.log(filteredValues.items);
+                    _this.scope.inventoryLabelModule.inventoryItemLotListGrid.data = val.items;
+                    _this.gridService.adjustInventoryItemGridHeight("inventoryItemLotListGrid", val.items.length, 500);
+                    _this.scope.globalSelection.transactionStatus.inventoryItemLotList = false;
+                    _this.refreshTransactionStatus();
+                }, function (err) {
+                    _this.scope.globalSelection.transactionStatus.inventoryItemLotList = false;
+                    _this.refreshTransactionStatus();
+                    var error = "API: " + err.program + "." + err.transaction + ", Input: " + JSON.stringify(err.requestData) + ", Error Code: " + err.errorCode;
+                    _this.showError(error, [err.errorMessage]);
+                    _this.scope.statusBar.push({ message: error + " " + err.errorMessage, statusBarMessageType: h5.application.MessageType.Error, timestamp: new Date() });
+                });
+            };
+            AppController.prototype.loadItem = function (itemNumber) {
+                var _this = this;
+                this.scope.loadingData = true;
+                this.scope.globalSelection.transactionStatus.item = true;
+                this.appService.getItem(itemNumber).then(function (val) {
+                    _this.scope.globalSelection.item = val.items;
+                    _this.scope.globalSelection.transactionStatus.item = false;
+                    _this.refreshTransactionStatus();
+                }, function (err) {
+                    _this.scope.globalSelection.transactionStatus.item = false;
+                    _this.refreshTransactionStatus();
+                    var error = "API: " + err.program + "." + err.transaction + ", Input: " + JSON.stringify(err.requestData) + ", Error Code: " + err.errorCode;
+                    _this.showError(error, [err.errorMessage]);
+                    _this.scope.statusBar.push({ message: error + " " + err.errorMessage, statusBarMessageType: h5.application.MessageType.Error, timestamp: new Date() });
+                });
+            };
+            AppController.prototype.displayMOLabel = function (fieldName, selectedRow) {
+                this.scope.MOLabelModule.selectedMOLabelListRow = selectedRow;
+                var MOLabel = selectedRow;
+                this.loadMOLabel(this.scope.MOLabelModule.facility.selected, MOLabel.VHMFNO, MOLabel.VHITNO, MOLabel.VHWHLO, MOLabel.MMITDS, MOLabel.VHPLGR, MOLabel.MMSPE5, MOLabel.MMUNMS, "", MOLabel.MMSPE2, MOLabel.MMSPE3, MOLabel.MMEVGR, "", MOLabel.VHBANO, "1", MOLabel.VHORQT, MOLabel.VHMAUN);
+                this.loadLabelTypeList();
+                this.loadTradeNames();
+                this.loadWorkCenters(this.scope.MOLabelModule.facility.selected);
+                this.netGrossCheck();
+                this.openMOLabelModal();
+            };
+            AppController.prototype.displayInventoryItemLabel = function (fieldName, selectedRow) {
+                this.scope.inventoryLabelModule.selectedInventoryItemLotListRow = selectedRow;
+                var itemLot = selectedRow;
+                var item = this.scope.inventoryLabelModule.selectedInventoryItemListRow;
+                this.loadInventoryLabel(item.MLWHLO, itemLot.ITNO, item.MMITDS, itemLot.BANO, itemLot.REDA, itemLot.RORN, itemLot.BREF, itemLot.BRE2, item.MMUNMS, item.MLSTQT);
+                this.openInventoryLabelModal();
+            };
+            AppController.prototype.displayInventoryItemLot = function (fieldName, selectedRow) {
+                this.scope.inventoryLabelModule.selectedInventoryItemListRow = selectedRow;
+                this.scope.inventoryLabelModule.itemNumber = selectedRow.MLITNO;
+                this.scope.inventoryLabelModule.location = selectedRow.MLWHSL;
+                this.loadInventoryItemLotList(this.scope.inventoryLabelModule.itemNumber);
             };
             AppController.prototype.loadWarehouseList = function (company) {
                 var _this = this;
                 this.scope.loadingData = true;
-                this.scope.globalSelection.transactionStatus.warehouseList = true;
+                this.scope.inventoryLabelModule.transactionStatus.warehouseList = true;
                 this.appService.getWarehouseList(company).then(function (val) {
-                    _this.scope.globalSelection.warehouseList = val.items;
-                    _this.scope.globalSelection.transactionStatus.warehouseList = false;
+                    _this.scope.inventoryLabelModule.warehouseList = val.items;
+                    _this.scope.inventoryLabelModule.transactionStatus.warehouseList = false;
                     _this.refreshTransactionStatus();
                 }, function (err) {
-                    _this.scope.globalSelection.transactionStatus.warehouseList = false;
+                    _this.scope.inventoryLabelModule.transactionStatus.warehouseList = false;
                     _this.refreshTransactionStatus();
                     var error = "API: " + err.program + "." + err.transaction + ", Input: " + JSON.stringify(err.requestData) + ", Error Code: " + err.errorCode;
                     _this.showError(error, [err.errorMessage]);
@@ -627,43 +945,626 @@ var h5;
             AppController.prototype.loadFacilityList = function (company, division) {
                 var _this = this;
                 this.scope.loadingData = true;
-                this.scope.globalSelection.transactionStatus.facilityList = true;
+                this.scope.MOLabelModule.transactionStatus.facilityList = true;
                 this.appService.getFacilityList(company, division).then(function (val) {
-                    _this.scope.globalSelection.facilityList = val.items;
-                    _this.scope.globalSelection.transactionStatus.facilityList = false;
+                    _this.scope.MOLabelModule.facilityList = val.items;
+                    _this.scope.MOLabelModule.transactionStatus.facilityList = false;
                     _this.refreshTransactionStatus();
                 }, function (err) {
-                    _this.scope.globalSelection.transactionStatus.facilityList = false;
+                    _this.scope.MOLabelModule.transactionStatus.facilityList = false;
                     _this.refreshTransactionStatus();
                     var error = "API: " + err.program + "." + err.transaction + ", Input: " + JSON.stringify(err.requestData) + ", Error Code: " + err.errorCode;
                     _this.showError(error, [err.errorMessage]);
                     _this.scope.statusBar.push({ message: error + " " + err.errorMessage, statusBarMessageType: h5.application.MessageType.Error, timestamp: new Date() });
+                    _this.refreshTransactionStatus();
                 });
             };
-            AppController.prototype.loadLabelDetails = function (printer, user, media) {
+            AppController.prototype.loadLabelTypeList = function () {
                 var _this = this;
                 this.scope.loadingData = true;
-                this.scope.labelModule.transactionStatus.labelDetails = true;
-                this.appService.getPrinter1(printer, user, media).then(function (val) {
-                    _this.scope.labelModule.labelDetails = val.items;
-                    _this.scope.labelModule.transactionStatus.labelDetails = false;
+                this.scope.MOLabelModule.transactionStatus.labelTypeList = true;
+                this.appService.getLabelTypeListAlpha().then(function (val) {
+                    var fileName = "LBLCUS";
+                    _this.scope.MOLabelModule.labelTypeList = _this.filterZSYTAB(fileName, val);
+                    _this.scope.MOLabelModule.transactionStatus.labelTypeList = false;
                     _this.refreshTransactionStatus();
                 }, function (err) {
-                    _this.scope.labelModule.transactionStatus.labelDetails = false;
+                    _this.scope.MOLabelModule.transactionStatus.labelTypeList = false;
+                    _this.refreshTransactionStatus();
+                    var error = "API: " + err.program + "." + err.transaction + ", Input: " + JSON.stringify(err.requestData) + ", Error Code: " + err.errorCode;
+                    _this.showError(error, [err.errorMessage]);
+                    _this.scope.statusBar.push({ message: error + " " + err.errorMessage, statusBarMessageType: h5.application.MessageType.Error, timestamp: new Date() });
+                    _this.refreshTransactionStatus();
+                });
+            };
+            AppController.prototype.loadTradeNames = function () {
+                var _this = this;
+                this.scope.loadingData = true;
+                this.scope.MOLabelModule.transactionStatus.tradeNames = true;
+                this.appService.getTradeNameAlpha().then(function (val) {
+                    var fileName = "ZZUDF8";
+                    _this.scope.MOLabelModule.tradeNames = _this.filterZSYTAB(fileName, val);
+                    _this.scope.MOLabelModule.transactionStatus.tradeNames = false;
+                    _this.refreshTransactionStatus();
+                }, function (err) {
+                    _this.scope.MOLabelModule.transactionStatus.tradeNames = false;
+                    _this.refreshTransactionStatus();
+                    var error = "API: " + err.program + "." + err.transaction + ", Input: " + JSON.stringify(err.requestData) + ", Error Code: " + err.errorCode;
+                    _this.showError(error, [err.errorMessage]);
+                    _this.scope.statusBar.push({ message: error + " " + err.errorMessage, statusBarMessageType: h5.application.MessageType.Error, timestamp: new Date() });
+                    _this.refreshTransactionStatus();
+                });
+            };
+            AppController.prototype.loadWorkCenters = function (facility) {
+                var _this = this;
+                this.scope.loadingData = true;
+                this.scope.MOLabelModule.transactionStatus.workCenters = true;
+                this.appService.getWorkCenters(facility).then(function (val) {
+                    _this.scope.MOLabelModule.workCenters = val.items;
+                    _this.scope.MOLabelModule.transactionStatus.workCenters = false;
+                    _this.refreshTransactionStatus();
+                }, function (err) {
+                    _this.scope.MOLabelModule.transactionStatus.workCenters = false;
+                    _this.refreshTransactionStatus();
+                    var error = "API: " + err.program + "." + err.transaction + ", Input: " + JSON.stringify(err.requestData) + ", Error Code: " + err.errorCode;
+                    _this.showError(error, [err.errorMessage]);
+                    _this.scope.statusBar.push({ message: error + " " + err.errorMessage, statusBarMessageType: h5.application.MessageType.Error, timestamp: new Date() });
+                    _this.refreshTransactionStatus();
+                });
+            };
+            AppController.prototype.loadInventoryLabel = function (warehouse, itemNumber, itemDescription, lotNumber, receiptDate, referenceOrder, lotRef1, lotRef2, UOM, quantity) {
+                console.log(receiptDate);
+                var year = receiptDate.slice(0, 4);
+                var month = receiptDate.slice(4, 6);
+                var day = receiptDate.slice(6, 8);
+                var dateFMT = new Date(month + "/" + day + "/" + year);
+                this.scope.globalSelection.inventoryLabel = {
+                    WHLO: warehouse,
+                    ITNO: itemNumber,
+                    ITDS: itemDescription,
+                    BANO: lotNumber,
+                    REDA: dateFMT,
+                    RORN: referenceOrder,
+                    BREF: lotRef1,
+                    BRE2: lotRef2,
+                    UNMS: UOM,
+                    STQT: 0,
+                    BXNO: 1,
+                    LBPB: 1,
+                    MULT: false
+                };
+            };
+            AppController.prototype.chgInventoryLabelAlpha = function (warehouse, itemNumber, location, receiptDate, lotNumber, referenceOrder, lotRef1, lotRef2, onHandBalance, labelType, userID, printer, labelsPerBox) {
+                var _this = this;
+                console.log("iN chgInventoryLabelAlpha");
+                this.scope.loadingData = true;
+                this.scope.inventoryLabelModule.transactionStatus.inventoryLabel = true;
+                this.appService.chgInventoryLabelAlpha(warehouse, itemNumber, location, receiptDate, lotNumber, referenceOrder, lotRef1, lotRef2, onHandBalance).then(function (val) {
+                    _this.scope.inventoryLabelModule.transactionStatus.inventoryLabel = false;
+                    _this.printInventoryLabel(labelType, warehouse, location, lotNumber, itemNumber, userID, printer, labelsPerBox);
+                }, function (err) {
+                    _this.scope.inventoryLabelModule.transactionStatus.inventoryLabel = false;
+                    _this.refreshTransactionStatus();
+                    var error = "API: " + err.program + "." + err.transaction + ", Input: " + JSON.stringify(err.requestData) + ", Error Code: " + err.errorCode;
+                    _this.showError(error, [err.errorMessage]);
+                    _this.scope.statusBar.push({ message: error + " " + err.errorMessage, statusBarMessageType: h5.application.MessageType.Error, timestamp: new Date() });
+                    _this.appService.addInventoryLabelAlpha(warehouse, itemNumber, location, receiptDate, lotNumber, referenceOrder, lotRef1, lotRef2, onHandBalance).then(function (val) {
+                        _this.scope.inventoryLabelModule.transactionStatus.inventoryLabel = false;
+                        _this.printInventoryLabel(labelType, warehouse, location, lotNumber, itemNumber, userID, printer, labelsPerBox);
+                    }, function (err) {
+                        _this.scope.inventoryLabelModule.transactionStatus.inventoryLabel = false;
+                        _this.refreshTransactionStatus();
+                        var error = "API: " + err.program + "." + err.transaction + ", Input: " + JSON.stringify(err.requestData) + ", Error Code: " + err.errorCode;
+                        _this.showError(error, [err.errorMessage]);
+                        _this.scope.statusBar.push({ message: error + " " + err.errorMessage, statusBarMessageType: h5.application.MessageType.Error, timestamp: new Date() });
+                    });
+                }).finally(function () {
+                    _this.refreshTransactionStatus();
+                });
+            };
+            AppController.prototype.loadMOLabel = function (facility, moNumber, itemNumber, warehouse, description, workCenter, tradeName, UOM, labelType, compound, color, MSD, info, lotNumber, startingBox, orderQty, altUOM) {
+                var _this = this;
+                console.log("LOADING MO LABEL");
+                this.scope.loadingData = true;
+                this.scope.globalSelection.transactionStatus.MOLabel = true;
+                this.appService.getMOLabelFieldsAlpha(facility, moNumber, itemNumber, warehouse).then(function (valAlpha) {
+                    console.log("LOADING getMOLabelFieldsAlpha");
+                    _this.scope.MOLabelModule.MOLabelExists = true;
+                    _this.appService.getMOLabelFieldsNumeric(facility, moNumber, itemNumber, warehouse).then(function (valNumeric) {
+                        console.log("LOADING getMOLabelFieldsNumeric");
+                        _this.scope.globalSelection.MOLabel = {
+                            FACI: valAlpha.items[0].PK01,
+                            MFNO: valAlpha.items[0].PK02,
+                            ITNO: valAlpha.items[0].PK03,
+                            WHLO: valAlpha.items[0].PK04,
+                            ITDS: valAlpha.items[0].AL30,
+                            PLGR: valAlpha.items[0].AL31,
+                            SPE5: valAlpha.items[0].AL32,
+                            UNMS: valAlpha.items[0].AL33,
+                            FMTN: valAlpha.items[0].AL34,
+                            SPE2: valAlpha.items[0].AL35,
+                            SPE3: valAlpha.items[0].AL36,
+                            EVGR: parseInt(valAlpha.items[0].AL37),
+                            ADTL: valAlpha.items[0].AL38,
+                            BANO: valAlpha.items[0].AL39,
+                            BOXN: parseInt(valNumeric.items[0].N096),
+                            ORQG: 0.0,
+                            ORQN: 0.0,
+                            BXNO: 1,
+                            LBPB: 2,
+                            REND: false,
+                            ORQT: orderQty,
+                            MAUN: altUOM
+                        };
+                        var appConfig = _this.scope.appConfig;
+                        var workCenter = angular.isString(appConfig.searchQuery.workCenter) ? appConfig.searchQuery.workCenter : _this.scope.globalSelection.MOLabel.PLGR;
+                        var tradeName = angular.isString(appConfig.searchQuery.tradeName) ? appConfig.searchQuery.tradeName : _this.scope.globalSelection.MOLabel.SPE5;
+                        var labelType = angular.isString(appConfig.searchQuery.labelType) ? appConfig.searchQuery.labelType : _this.scope.globalSelection.MOLabel.FMTN;
+                        _this.scope.MOLabelModule.workCenter = { selected: workCenter };
+                        _this.scope.MOLabelModule.tradeName = { selected: tradeName };
+                        _this.scope.MOLabelModule.labelType = { selected: labelType };
+                    }, function (err) {
+                        console.log("FAIL getMOLabelFieldsNumeric");
+                        _this.scope.globalSelection.transactionStatus.MOLabel = false;
+                        _this.refreshTransactionStatus();
+                        var error = "API: " + err.program + "." + err.transaction + ", Input: " + JSON.stringify(err.requestData) + ", Error Code: " + err.errorCode;
+                        _this.showError(error, [err.errorMessage]);
+                        _this.scope.statusBar.push({ message: error + " " + err.errorMessage, statusBarMessageType: h5.application.MessageType.Error, timestamp: new Date() });
+                    });
+                    _this.scope.globalSelection.transactionStatus.MOLabel = false;
+                    _this.refreshTransactionStatus();
+                }, function (err) {
+                    console.log("FAIL getMOLabelFieldsALPHA");
+                    _this.scope.MOLabelModule.MOLabelExists = false;
+                    _this.scope.globalSelection.transactionStatus.MOLabel = false;
+                    _this.refreshTransactionStatus();
+                    _this.appService.addMOLabelFieldsAlpha(facility, moNumber, itemNumber, warehouse, description, workCenter, tradeName, UOM, labelType, compound, color, MSD, info, lotNumber).then(function (val) {
+                        _this.appService.addMOLabelFieldsNumeric(facility, moNumber, itemNumber, warehouse, "1").then(function (valAlpha) {
+                            _this.scope.MOLabelModule.MOLabelExists = true;
+                            _this.appService.getMOLabelFieldsAlpha(facility, moNumber, itemNumber, warehouse).then(function (valAlpha) {
+                                _this.scope.MOLabelModule.MOLabelExists = true;
+                                _this.appService.getMOLabelFieldsNumeric(facility, moNumber, itemNumber, warehouse).then(function (valNumeric) {
+                                    _this.scope.globalSelection.MOLabel = {
+                                        FACI: valAlpha.items[0].PK01,
+                                        MFNO: valAlpha.items[0].PK02,
+                                        ITNO: valAlpha.items[0].PK03,
+                                        WHLO: valAlpha.items[0].PK04,
+                                        ITDS: valAlpha.items[0].AL30,
+                                        PLGR: valAlpha.items[0].AL31,
+                                        SPE5: valAlpha.items[0].AL32,
+                                        UNMS: valAlpha.items[0].AL33,
+                                        FMTN: valAlpha.items[0].AL34,
+                                        SPE2: valAlpha.items[0].AL35,
+                                        SPE3: valAlpha.items[0].AL36,
+                                        EVGR: parseInt(valAlpha.items[0].AL37),
+                                        ADTL: valAlpha.items[0].AL38,
+                                        BANO: valAlpha.items[0].AL39,
+                                        BOXN: parseInt(valNumeric.items[0].N096),
+                                        ORQG: 0.0,
+                                        ORQN: 0.0,
+                                        BXNO: 1,
+                                        LBPB: 2,
+                                        REND: false,
+                                        ORQT: orderQty,
+                                        MAUN: altUOM
+                                    };
+                                    var appConfig = _this.scope.appConfig;
+                                    var workCenter = angular.isString(appConfig.searchQuery.workCenter) ? appConfig.searchQuery.workCenter : _this.scope.globalSelection.MOLabel.PLGR;
+                                    var tradeName = angular.isString(appConfig.searchQuery.tradeName) ? appConfig.searchQuery.tradeName : _this.scope.globalSelection.MOLabel.SPE5;
+                                    var labelType = angular.isString(appConfig.searchQuery.labelType) ? appConfig.searchQuery.labelType : _this.scope.globalSelection.MOLabel.FMTN;
+                                    _this.scope.MOLabelModule.workCenter = { selected: workCenter };
+                                    _this.scope.MOLabelModule.tradeName = { selected: tradeName };
+                                    _this.scope.MOLabelModule.labelType = { selected: labelType };
+                                }, function (err) {
+                                    _this.scope.globalSelection.transactionStatus.MOLabel = false;
+                                    _this.refreshTransactionStatus();
+                                    var error = "API: " + err.program + "." + err.transaction + ", Input: " + JSON.stringify(err.requestData) + ", Error Code: " + err.errorCode;
+                                    _this.showError(error, [err.errorMessage]);
+                                    _this.scope.statusBar.push({ message: error + " " + err.errorMessage, statusBarMessageType: h5.application.MessageType.Error, timestamp: new Date() });
+                                });
+                                _this.scope.globalSelection.transactionStatus.MOLabel = false;
+                                _this.refreshTransactionStatus();
+                            }, function (err) {
+                                _this.scope.globalSelection.transactionStatus.MOLabel = false;
+                                _this.refreshTransactionStatus();
+                                var error = "API: " + err.program + "." + err.transaction + ", Input: " + JSON.stringify(err.requestData) + ", Error Code: " + err.errorCode;
+                                _this.showError(error, [err.errorMessage]);
+                                _this.scope.statusBar.push({ message: error + " " + err.errorMessage, statusBarMessageType: h5.application.MessageType.Error, timestamp: new Date() });
+                            });
+                            _this.scope.globalSelection.transactionStatus.MOLabel = false;
+                            _this.refreshTransactionStatus();
+                        }, function (err) {
+                            _this.scope.globalSelection.transactionStatus.MOLabel = false;
+                            _this.refreshTransactionStatus();
+                            var error = "API: " + err.program + "." + err.transaction + ", Input: " + JSON.stringify(err.requestData) + ", Error Code: " + err.errorCode;
+                            _this.showError(error, [err.errorMessage]);
+                            _this.scope.statusBar.push({ message: error + " " + err.errorMessage, statusBarMessageType: h5.application.MessageType.Error, timestamp: new Date() });
+                        });
+                    }, function (err) {
+                        _this.scope.globalSelection.transactionStatus.MOLabel = false;
+                        _this.refreshTransactionStatus();
+                        var error = "API: " + err.program + "." + err.transaction + ", Input: " + JSON.stringify(err.requestData) + ", Error Code: " + err.errorCode;
+                        _this.showError(error, [err.errorMessage]);
+                        _this.scope.statusBar.push({ message: error + " " + err.errorMessage, statusBarMessageType: h5.application.MessageType.Error, timestamp: new Date() });
+                    });
+                });
+            };
+            AppController.prototype.updMOLabel = function (facility, moNumber, itemNumber, warehouse, description, workCenter, tradeName, UOM, labelType, compound, color, MSD, info, lotNumber, startingBox) {
+                var _this = this;
+                console.log("IN updMOLabel METHOD");
+                this.scope.loadingData = true;
+                this.scope.globalSelection.transactionStatus.MOLabel = true;
+                this.appService.chgMOLabelFieldsAlpha(facility, moNumber, itemNumber, warehouse, description, workCenter, tradeName, UOM, labelType, compound, color, MSD, info, lotNumber).then(function (val) {
+                    _this.appService.chgMOLabelFieldsNumeric(facility, moNumber, itemNumber, warehouse, startingBox).then(function (val) {
+                        _this.scope.globalSelection.transactionStatus.MOLabel = false;
+                        _this.loadMOList(facility);
+                    }, function (err) {
+                        console.log("ERROR IN  chgMOLabelFieldsNumeric METHOD");
+                        _this.scope.globalSelection.transactionStatus.MOLabel = false;
+                        var error = "API: " + err.program + "." + err.transaction + ", Input: " + JSON.stringify(err.requestData) + ", Error Code: " + err.errorCode;
+                        _this.showError(error, [err.errorMessage]);
+                        _this.scope.statusBar.push({ message: error + " " + err.errorMessage, statusBarMessageType: h5.application.MessageType.Error, timestamp: new Date() });
+                    });
+                }, function (err) {
+                    console.log("ERROR IN  chgMOLabelFieldsAlpha METHOD");
+                    _this.scope.globalSelection.transactionStatus.MOLabel = false;
+                    var error = "API: " + err.program + "." + err.transaction + ", Input: " + JSON.stringify(err.requestData) + ", Error Code: " + err.errorCode;
+                    _this.showError(error, [err.errorMessage]);
+                    _this.scope.statusBar.push({ message: error + " " + err.errorMessage, statusBarMessageType: h5.application.MessageType.Error, timestamp: new Date() });
+                }).finally(function () {
+                    _this.refreshTransactionStatus();
+                });
+            };
+            AppController.prototype.updSuffix = function (facility, moNumber, itemNumber, warehouse, boxNumber, labelType, responsible, altUOM, lotNumber, workCenter, grossWeight, netWeight, altGrossWeight, altNetWeight, startingBox, scanQty, lastBox, labelsPerBox) {
+                var _this = this;
+                var ret = false;
+                console.log("in updSuffix");
+                this.scope.loadingData = true;
+                this.scope.globalSelection.transactionStatus.MOLabel = true;
+                this.appService.chgMOLabelSuffixAlpha(facility, moNumber, itemNumber, warehouse, boxNumber, altUOM, lotNumber, workCenter, labelType, responsible).then(function (val) {
+                    console.log("ALPHA CHANGED");
+                    _this.appService.chgMOLabelSuffixNumeric(facility, moNumber, itemNumber, warehouse, boxNumber, grossWeight, netWeight, altGrossWeight, altNetWeight, startingBox, scanQty, lastBox).then(function (val) {
+                        _this.scope.globalSelection.transactionStatus.MOLabel = false;
+                        console.log("NUMERIC CHANGED");
+                    }, function (err) {
+                        console.log("****" + err.errorField);
+                        console.log("****" + err.errorMessage + " now in  chgMOLabelSuffixNumeric");
+                        _this.scope.globalSelection.transactionStatus.MOLabel = false;
+                        var error = "API: " + err.program + "." + err.transaction + ", Input: " + JSON.stringify(err.requestData) + ", Error Code: " + err.errorCode;
+                        _this.showError(error, [err.errorMessage]);
+                        _this.scope.statusBar.push({ message: error + " " + err.errorMessage, statusBarMessageType: h5.application.MessageType.Error, timestamp: new Date() });
+                    });
+                }, function (err) {
+                    console.log("****" + err.errorMessage + " now in  add");
+                    _this.scope.MOLabelModule.suffixExists = false;
+                    _this.scope.globalSelection.transactionStatus.MOLabel = false;
+                    console.log(facility, moNumber, itemNumber, warehouse, boxNumber, altUOM, lotNumber, workCenter, labelType, responsible);
+                    _this.appService.addMOLabelSuffixAlpha(facility, moNumber, itemNumber, warehouse, boxNumber, altUOM, lotNumber, workCenter, labelType, responsible).then(function (val) {
+                        console.log("in addMOLabelSuffixAlpha");
+                        _this.appService.addMOLabelSuffixNumeric(facility, moNumber, itemNumber, warehouse, boxNumber, grossWeight, netWeight, altGrossWeight, altNetWeight, startingBox, scanQty, lastBox).then(function (val) {
+                            console.log("in addMOLabelSuffixNumeric");
+                            _this.scope.globalSelection.transactionStatus.MOLabel = false;
+                        }, function (err) {
+                            console.log("1598 " + err.errorMessage);
+                            _this.scope.globalSelection.transactionStatus.MOLabel = false;
+                            var error = "API: " + err.program + "." + err.transaction + ", Input: " + JSON.stringify(err.requestData) + ", Error Code: " + err.errorCode;
+                            _this.showError(error, [err.errorMessage]);
+                            _this.scope.statusBar.push({ message: error + " " + err.errorMessage, statusBarMessageType: h5.application.MessageType.Error, timestamp: new Date() });
+                        });
+                    }, function (err) {
+                        console.log("1606 " + err.errorMessage);
+                        _this.scope.globalSelection.transactionStatus.MOLabel = false;
+                        var error = "API: " + err.program + "." + err.transaction + ", Input: " + JSON.stringify(err.requestData) + ", Error Code: " + err.errorCode;
+                        _this.showError(error, [err.errorMessage]);
+                        _this.scope.statusBar.push({ message: error + " " + err.errorMessage, statusBarMessageType: h5.application.MessageType.Error, timestamp: new Date() });
+                    });
+                }).finally(function () {
+                    _this.printMOLabel(labelType, facility, moNumber, boxNumber.toString(), itemNumber, _this.scope.userContext.m3User, _this.scope.globalSelection.printer.selected.DEV, labelsPerBox);
+                    _this.refreshTransactionStatus();
+                });
+                return ret;
+            };
+            AppController.prototype.printInventoryLabel = function (labelType, warehouse, location, lotNumber, itemNumber, userID, printer, labelsPerBox) {
+                var _this = this;
+                this.scope.loadingData = true;
+                this.appService.addXMLRecord(labelType, warehouse, location, lotNumber, null, itemNumber, userID).then(function (val) {
+                    console.log("XML record saved 1681 ");
+                    console.log(labelsPerBox);
+                    for (var y = 1; y <= labelsPerBox; y++) {
+                        _this.callInventoryLabelPrint(itemNumber, printer, labelType, warehouse, location, lotNumber, labelsPerBox);
+                    }
+                }, function (err) {
+                    _this.appService.chgXMLRecord(labelType, warehouse, location, lotNumber, null, itemNumber, userID).then(function (val) {
+                        console.log("XML record saved 1688");
+                        console.log(labelsPerBox);
+                        for (var y = 1; y <= labelsPerBox; y++) {
+                            _this.callInventoryLabelPrint(itemNumber, printer, labelType, warehouse, location, lotNumber, labelsPerBox);
+                        }
+                    }, function (err) {
+                        console.log("Fail");
+                        var error = "API: " + err.program + "." + err.transaction + ", Input: " + JSON.stringify(err.requestData) + ", Error Code: " + err.errorCode;
+                        _this.showError(error, [err.errorMessage]);
+                        _this.scope.statusBar.push({ message: error + " " + err.errorMessage, statusBarMessageType: h5.application.MessageType.Error, timestamp: new Date() });
+                    });
+                }).finally(function () {
+                    _this.refreshTransactionStatus();
+                });
+            };
+            AppController.prototype.callInventoryLabelPrint = function (itemNumber, printer, labelType, warehouse, location, lotNumber, labelsPerBox) {
+                var _this = this;
+                this.scope.loadingData = true;
+                this.scope.globalSelection.transactionStatus.MOLabel = true;
+                this.appService.printInventoryLabel(itemNumber, printer, labelType, warehouse, location, lotNumber, labelsPerBox).then(function (val) {
+                    console.log("Inventory Label Successfully Printed");
+                    _this.showInfo("Inventory Label Successfully Printed", ["Inventory Label Printed"]);
+                    _this.scope.globalSelection.transactionStatus.MOLabel = false;
+                    _this.loadMOList(warehouse);
+                }, function (err) {
+                    _this.scope.globalSelection.transactionStatus.MOLabel = false;
+                    var error = "API: " + err.program + "." + err.transaction + ", Input: " + JSON.stringify(err.requestData) + ", Error Code: " + err.errorCode;
+                    _this.showError(error, [err.errorMessage]);
+                    _this.scope.statusBar.push({ message: error + " " + err.errorMessage, statusBarMessageType: h5.application.MessageType.Error, timestamp: new Date() });
+                }).finally(function () {
+                    _this.refreshTransactionStatus();
+                });
+            };
+            AppController.prototype.printMOLabel = function (labelType, facility, moNumber, boxNumber, itemNumber, userID, printer, labelsPerBox) {
+                var _this = this;
+                this.scope.loadingData = true;
+                this.appService.addXMLRecord(labelType, facility, moNumber, boxNumber, null, itemNumber, userID).then(function (val) {
+                    console.log("XML record ADDED 17344");
+                    console.log(labelsPerBox);
+                    for (var y = 1; y <= labelsPerBox; y++) {
+                        _this.callMOLabelPrint(itemNumber, printer, labelType, facility, moNumber, boxNumber, labelsPerBox);
+                    }
+                    _this.refreshTransactionStatus();
+                }, function (err) {
+                    _this.appService.chgXMLRecord(labelType, facility, moNumber, boxNumber, null, itemNumber, userID).then(function (val) {
+                        console.log("ADD Fail XML INSTEAD XML record SAVED 1747");
+                        for (var y = 1; y <= labelsPerBox; y++) {
+                            _this.callMOLabelPrint(itemNumber, printer, labelType, facility, moNumber, boxNumber, labelsPerBox);
+                        }
+                        _this.refreshTransactionStatus();
+                    }, function (err) {
+                        console.log("CHANGED Fail XML");
+                        var error = "API: " + err.program + "." + err.transaction + ", Input: " + JSON.stringify(err.requestData) + ", Error Code: " + err.errorCode;
+                        _this.showError(error, [err.errorMessage]);
+                        _this.scope.statusBar.push({ message: error + " " + err.errorMessage, statusBarMessageType: h5.application.MessageType.Error, timestamp: new Date() });
+                    });
+                }).finally(function () {
+                });
+            };
+            AppController.prototype.callMOLabelPrint = function (itemNumber, printer, labelType, facility, moNumber, boxNumber, labelsPerBox) {
+                var _this = this;
+                var user = this.scope.userContext.m3User;
+                this.scope.loadingData = true;
+                this.scope.globalSelection.transactionStatus.MOLabel = true;
+                this.appService.printMOLabel(itemNumber, printer, labelType, facility, moNumber, boxNumber, labelsPerBox).then(function (val) {
+                    console.log("Mo Label Successfully Printed");
+                    _this.showInfo("Mo Label Successfully Printed", ["MO Label Printed"]);
+                    _this.scope.globalSelection.transactionStatus.MOLabel = false;
+                    _this.loadMOList(facility);
+                }, function (err) {
+                    _this.scope.globalSelection.transactionStatus.MOLabel = false;
+                    var error = "API: " + err.program + "." + err.transaction + ", Input: " + JSON.stringify(err.requestData) + ", Error Code: " + err.errorCode;
+                    _this.showError(error, [err.errorMessage]);
+                    _this.scope.statusBar.push({ message: error + " " + err.errorMessage, statusBarMessageType: h5.application.MessageType.Error, timestamp: new Date() });
+                }).finally(function () {
+                    _this.refreshTransactionStatus();
+                });
+            };
+            AppController.prototype.getConversionFactor = function (itemNumber, UOM, altUOM, netWeight, grossWeight) {
+                var _this = this;
+                this.scope.loadingData = true;
+                this.scope.MOLabelModule.transactionStatus.itemAltWeight = true;
+                this.appService.getItemAltUOM(itemNumber, altUOM).then(function (val) {
+                    _this.scope.MOLabelModule.transactionStatus.itemAltWeight = false;
+                    var MUALUN = val.items[0];
+                    var net;
+                    var gross;
+                    MUALUN.COFA = parseInt(MUALUN.COFA);
+                    if (MUALUN.COFA === 0) {
+                        MUALUN.COFA = 1;
+                    }
+                    if (MUALUN.DMCF === "1") {
+                        net = netWeight * MUALUN.COFA;
+                        net = net.toFixed(3);
+                        gross = grossWeight * MUALUN.COFA;
+                        gross = gross.toFixed(3);
+                    }
+                    if (MUALUN.DMCF === "2") {
+                        net = netWeight / MUALUN.COFA;
+                        net = net.toFixed(3);
+                        gross = grossWeight / MUALUN.COFA;
+                        gross = gross.toFixed(3);
+                    }
+                    _this.scope.MOLabelModule.itemAltWeight.netWeight = net;
+                    _this.refreshTransactionStatus();
+                }, function (err) {
+                    _this.scope.MOLabelModule.transactionStatus.itemAltWeight = false;
                     _this.refreshTransactionStatus();
                     var error = "API: " + err.program + "." + err.transaction + ", Input: " + JSON.stringify(err.requestData) + ", Error Code: " + err.errorCode;
                     _this.showError(error, [err.errorMessage]);
                     _this.scope.statusBar.push({ message: error + " " + err.errorMessage, statusBarMessageType: h5.application.MessageType.Error, timestamp: new Date() });
                 });
             };
-            AppController.prototype.loadlabelModule = function (reLoad) {
+            AppController.prototype.loadMOLabelModule = function (reLoad) {
                 var userContext = this.scope.userContext;
                 if (reLoad) {
-                    this.clearData(["labelModule"]);
-                    var selectedWarehouse = this.scope.globalSelection.warehouse;
-                    this.loadLabelDetails("TZLB92PF", userContext.m3User, "*PRT");
+                    this.clearData(["MOLabelModule"]);
+                    var selectedFacility = this.scope.MOLabelModule.facility;
+                    if (selectedFacility.selected) {
+                        this.loadMOList(selectedFacility.selected);
+                    }
                 }
-                this.scope.labelModule.reload = false;
+                this.scope.MOLabelModule.reload = false;
+            };
+            AppController.prototype.loadInventoryLabelModule = function (reLoad) {
+                var userContext = this.scope.userContext;
+                this.scope.inventoryLabelModule.itemNumber = "";
+                if (reLoad) {
+                    this.clearData(["inventoryLabelModule"]);
+                    var selectedWarehouse = this.scope.inventoryLabelModule.warehouse;
+                    if (selectedWarehouse.selected) {
+                        this.loadInventoryItemList(selectedWarehouse.selected);
+                    }
+                }
+                this.scope.inventoryLabelModule.reload = false;
+            };
+            AppController.prototype.submitMOForm = function (isValid) {
+                if (isValid) {
+                    this.onMOPrint();
+                }
+                else {
+                    console.log("not printed");
+                }
+            };
+            AppController.prototype.submitInventoryForm = function (isValid) {
+                if (isValid) {
+                    this.onInventoryPrint();
+                }
+                else {
+                    console.log("not printed");
+                }
+            };
+            AppController.prototype.onInventoryPrint = function () {
+                var userContext = this.scope.userContext;
+                var warehouse = this.scope.globalSelection.inventoryLabel.WHLO;
+                var location = this.scope.inventoryLabelModule.location;
+                var itemNumber = this.scope.globalSelection.inventoryLabel.ITNO;
+                var itemDescription = this.scope.globalSelection.inventoryLabel.ITDS;
+                var lotNumber = this.scope.globalSelection.inventoryLabel.BANO;
+                var receiptDate = new Date(this.scope.globalSelection.inventoryLabel.REDA).toLocaleDateString('en-US');
+                var receiptDate2 = new Date(this.scope.globalSelection.inventoryLabel.REDA);
+                var referenceOrder = this.scope.globalSelection.inventoryLabel.RORN;
+                var lotRef1 = this.scope.globalSelection.inventoryLabel.BREF;
+                var lotRef2 = this.scope.globalSelection.inventoryLabel.BRE2;
+                var UOM = this.scope.globalSelection.inventoryLabel.UNMS;
+                var quantity = this.scope.globalSelection.inventoryLabel.STQT;
+                var numOfBoxes = this.scope.globalSelection.inventoryLabel.BXNO;
+                var labelsPerBox = this.scope.globalSelection.inventoryLabel.LBPB;
+                var multipleLabels = this.scope.globalSelection.inventoryLabel.MULT;
+                var labelType = "P95";
+                var userID = this.scope.userContext.m3User;
+                var printer = this.scope.globalSelection.printer.selected.DEV;
+                2;
+                receiptDate = new Date(receiptDate).toLocaleDateString('en-US');
+                var dateYear = receiptDate2.getFullYear();
+                var dateMonth = receiptDate2.getMonth() + 1;
+                var dateDay = receiptDate2.getDate();
+                console.log("  receiptDate2getDate= " + receiptDate2.getDate());
+                console.log("  dateYear = " + dateYear);
+                console.log("  dateMonth) = " + dateMonth);
+                console.log("  dateDay) = " + dateDay);
+                var dateFMT = (dateMonth + "/" + dateDay + "/" + dateYear);
+                receiptDate = dateFMT;
+                console.log("onInventoryPrint  receiptDate = " + receiptDate);
+                console.log("new Date(this.scope.globalSelection.inventoryLabel.REDA )= " + new Date(this.scope.globalSelection.inventoryLabel.REDA).toDateString());
+                this.chgInventoryLabelAlpha(warehouse, itemNumber, location, receiptDate, lotNumber, referenceOrder, lotRef1, lotRef2, quantity, labelType, userID, printer, labelsPerBox);
+                if (multipleLabels === false) {
+                    this.closeModalWindow();
+                }
+            };
+            AppController.prototype.onMOPrint = function () {
+                console.log("MO label print start");
+                var userContext = this.scope.userContext;
+                var facility = this.scope.globalSelection.MOLabel.FACI;
+                var moNumber = this.scope.globalSelection.MOLabel.MFNO;
+                var itemNumber = this.scope.globalSelection.MOLabel.ITNO;
+                var warehouse = this.scope.globalSelection.MOLabel.WHLO;
+                var description = this.scope.globalSelection.MOLabel.ITDS;
+                var workCenter = this.scope.MOLabelModule.workCenter.selected;
+                var tradeName = this.scope.MOLabelModule.tradeName.selected;
+                var UOM = this.scope.globalSelection.MOLabel.UNMS;
+                var labelType = this.scope.MOLabelModule.labelType.selected;
+                var compound = this.scope.globalSelection.MOLabel.SPE2;
+                var color = this.scope.globalSelection.MOLabel.SPE3;
+                var MSD = this.scope.globalSelection.MOLabel.EVGR;
+                var info = this.scope.globalSelection.MOLabel.ADTL;
+                var lotNumber = this.scope.globalSelection.MOLabel.BANO;
+                var startingBox = this.scope.globalSelection.MOLabel.BOXN;
+                var grossWeight = this.scope.globalSelection.MOLabel.ORQG;
+                var netWeight = this.scope.globalSelection.MOLabel.ORQN;
+                var numOfBoxes = this.scope.globalSelection.MOLabel.BXNO;
+                var labelsPerBox = this.scope.globalSelection.MOLabel.LBPB;
+                var lastBox = this.scope.globalSelection.MOLabel.REND;
+                var scanQty = this.scope.globalSelection.MOLabel.ORQT;
+                var responsible = userContext.m3User;
+                var altUOM = this.scope.globalSelection.MOLabel.MAUN;
+                var altGrossWeight = grossWeight;
+                var altNetWeight = netWeight;
+                var selectedPrinter = this.scope.globalSelection.printer.selected.DEV + "";
+                var boxNum = startingBox;
+                var sfxBANO;
+                if (this.isLBSFacility()) {
+                    this.getConversionFactor(itemNumber, UOM, altUOM, netWeight, grossWeight);
+                    var itemAltWeight = this.scope.MOLabelModule.itemAltWeight;
+                    altGrossWeight = itemAltWeight.grossWeight;
+                    altNetWeight = itemAltWeight.netWeight;
+                }
+                for (var x = 1; x <= numOfBoxes; x++) {
+                    sfxBANO = lotNumber + this.padBoxNumber(boxNum.toString());
+                    this.updMOLabel(facility, moNumber, itemNumber, warehouse, description, workCenter, tradeName, UOM, labelType, compound, color, MSD, info, lotNumber, startingBox);
+                    console.log("PRINTED MOLABEL ");
+                    if (this.updSuffix(facility, moNumber, itemNumber, warehouse, boxNum, labelType, responsible, altUOM, sfxBANO, workCenter, grossWeight, netWeight, altGrossWeight, altNetWeight, startingBox, scanQty, lastBox, labelsPerBox)) {
+                        console.log("********                 UPDATEDLBLSFX ");
+                    }
+                    boxNum++;
+                }
+                console.log("AFTER LOOP UPDATE MOLABEL NEXT");
+                this.updMOLabel(facility, moNumber, itemNumber, warehouse, description, workCenter, tradeName, UOM, labelType, compound, color, MSD, info, lotNumber, boxNum);
+                this.closeModalWindow();
+            };
+            AppController.prototype.updPrinterFile = function () {
+                var _this = this;
+                var user = this.scope.userContext.m3User;
+                var userPrinter = this.scope.globalSelection.printer.selected;
+                console.log("userPrinter " + userPrinter);
+                this.appService.updPrintFile(user, userPrinter).then(function (val) {
+                }, function (err) {
+                    var error = "API: " + err.program + "." + err.transaction + ", Error Code: " + err.errorCode;
+                    _this.showError(error, [err.errorMessage]);
+                    _this.refreshTransactionStatus();
+                });
+            };
+            AppController.prototype.padBoxNumber = function (boxNumber) {
+                var paddedBoxNumber = "";
+                if (boxNumber.length === 1) {
+                    paddedBoxNumber = "00" + boxNumber;
+                }
+                else if (boxNumber.length === 2) {
+                    paddedBoxNumber = "0" + boxNumber;
+                }
+                else if (boxNumber.length === 3) {
+                }
+                return paddedBoxNumber;
+            };
+            AppController.prototype.isLBSFacility = function () {
+                return false;
+            };
+            AppController.prototype.printCheck = function () {
+                var workCenter = this.scope.globalSelection.MOLabel.PLGR;
+                var tradeName = this.scope.globalSelection.MOLabel.SPE5;
+                var labelType = this.scope.globalSelection.MOLabel.FMTN;
+                var compound = this.scope.globalSelection.MOLabel.SPE2;
+                var color = this.scope.globalSelection.MOLabel.SPE3;
+                var MSD = this.scope.globalSelection.MOLabel.EVGR;
+                var info = this.scope.globalSelection.MOLabel.ADTL;
+                var lotNumber = this.scope.globalSelection.MOLabel.BANO;
+                var startingBox = this.scope.globalSelection.MOLabel.BOXN;
+                var grossWeight = this.scope.globalSelection.MOLabel.ORQG;
+                var netWeight = this.scope.globalSelection.MOLabel.ORQN;
+                var numOfBoxes = this.scope.globalSelection.MOLabel.BXNO;
+                var labelsPerBox = this.scope.globalSelection.MOLabel.LBPB;
+                return true;
+            };
+            AppController.prototype.netGrossCheck = function () {
+                if (this.scope.globalSelection.MOLabel.ORQN > this.scope.globalSelection.MOLabel.ORQG) {
+                    this.scope.MOLabelModule.netNotLargerThanGross = false;
+                }
+                else {
+                    this.scope.MOLabelModule.netNotLargerThanGross = true;
+                }
             };
             AppController.$inject = ["$scope", "configService", "AppService", "RestService", "StorageService", "GridService", "m3UserService", "languageService", "$uibModal", "$interval", "$timeout", "$filter", "$q", "$window", "m3FormService", "$location"];
             return AppController;

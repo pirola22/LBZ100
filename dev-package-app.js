@@ -3,7 +3,7 @@ var fs = require('fs');
 var rimraf = require('rimraf');
 var zipdir = require('zip-dir');
 
-var zipName = 'customh5application.zip' 
+var zipName = 'LBZ100.zip' 
 var destDir = './toBeZipped';
 
 var runTypeScriptCompiler = function() {

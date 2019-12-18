@@ -4,7 +4,8 @@ module h5.application {
         public onStart() {
             this.name = "H5 Applicationqwerty";
             this.description = "LeanSwift - H5 Application.";
-            this.addUrlOverride("M3", "localhost", "http://localhost:1510");
+            //this.addUrlOverride("M3", "172.16.129.13", "http://172.16.129.13:1511");
+            this.addUrlOverride("M3", "172.16.129.13", "http://172.16.129.13:8485");
             this.frameworkPath = "lib/odin";
             this.languageOptions = {
                 application: true,

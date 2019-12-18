@@ -5,19 +5,44 @@ module h5.application {
         reload: boolean;
         transactionStatus: {
             warehouseList: boolean;
-            facilityList: boolean; 
+
             printerData: boolean;
-            printDescriptionData: boolean;
+            printer: boolean;
+
+            MOList: boolean;
+            MOLabel: boolean;
+            
+            inventoryItemList: boolean;
+            inventoryItemLotList: boolean;
+            
+            inventoryLabel: boolean;
+
+            item: boolean;
+            defaultPrinter: any;
 
         };
         warehouseList: any;
         warehouse: any;
-        facilityList: any; 
-        facility: any; 
+
         printerData: any;
-        printer: any;
-        printDescriptionData: any;
-        printDescription: any;
+        printer: any;        
+        defaultPrinter: any;
+        
+        MOList: any;
+        MO: any;
+        MOLabel: any;
+
+        inventoryItemList: any;
+        inventoryItemLotList: any;
+        inventoryItem: any
+        inventoryLabel: any;
+
+
+        item: any;
+
+        printerExists: boolean;
+
+
 
     }
 }
