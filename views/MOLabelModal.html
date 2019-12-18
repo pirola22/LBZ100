@@ -1,0 +1,319 @@
+<div class="modal-header">
+	<button type="button" class="close"
+		ng-click="AppCtrl.closeModalWindow()">&times;</button>
+	<h4 class="modal-title">{{::languageConstants.get('MO Label')}}</h4>
+</div>
+
+<div class="modal-body">
+	<div class="container-fluid">
+		<div class="alert alert-danger" role="alert"
+			ng-if="modelobject.childmodelobject.hasError">
+			<span>{{modelobject.childmodelobject.errorMessage}}</span>
+			<button type="button" class="close"
+				ng-click="modelobject.childmodelobject.hasError=false">
+				<span aria-hidden="true">&times;</span>
+			</button>
+		</div>
+	</div>
+	<form name="moForm" ng-submit="AppCtrl.submitMOForm(moForm.$valid)"
+		novalidate>
+		<div class="panel {{theme.panel}}">
+			<div class="table-responsive h5-padding-md">
+				<div class="row">
+					<div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+						<table class="inlineTable">
+							<tr>
+								<td>
+									<table class="inlineTable">
+										<tr class="h5-color-graphite">
+											<td><h5>{{::languageConstants.get('MO Number')}}</h5></td>
+											<td>:</td>
+											<td><input name="moNumber" type="text"
+												class="h5-input-sm" ng-model="globalSelection.MOLabel.MFNO"
+												name="MFNO" title="MO Number" maxlength="10" readonly></td>
+										</tr>
+										<tr class="h5-color-graphite">
+											<td><h5>{{::languageConstants.get('Item No')}}</h5></td>
+											<td>:</td>
+											<td><input name="itemNumber" type="text"
+												class="h5-input-sm" ng-model="globalSelection.MOLabel.ITNO"
+												name="ITNO" title="Item Number" maxlength="15" readonly></td>
+										</tr>
+										<tr class="h5-color-graphite">
+											<td><h5>{{::languageConstants.get('Description')}}</h5></td>
+											<td>:</td>
+											<td><input name="description" type="text"
+												class="h5-input-md" ng-model="globalSelection.MOLabel.ITDS"
+												name="ITDS" title="Description" maxlength="30" readonly></td>
+										</tr>
+										<tr class="h5-color-graphite">
+											<td><h5>{{::languageConstants.get('Warehouse')}}</h5></td>
+											<td>:</td>
+											<td><input name="warehouse" type="text"
+												class="h5-input-xs" ng-model="globalSelection.MOLabel.WHLO"
+												name="WHLO" title="Whse" maxlength="3" readonly></td>
+										</tr>
+
+										<tr>
+											<td><h5>{{::languageConstants.get('Work Center')}}</h5></td>
+											<td>:</td>
+											<td><ui-select name="workCenter"
+													class="h5-input-md {{theme.h5Dropdown}}"
+													ng-model="MOLabelModule.workCenter.selected"
+													theme="bootstrap" required> <ui-select-match
+													placeholder="Select Work Center">{{$select.selected.PLGR
+												+ ' - ' + $select.selected.PLNM}}</ui-select-match> <ui-select-choices
+													repeat="workCenters.PLGR as workCenters in MOLabelModule.workCenters | filter: $select.search track by workCenters.PLGR">
+												<span
+													ng-bind-html="workCenters.PLGR | highlight: $select.search"></span>
+												- <small
+													ng-bind-html="workCenters.PLNM | highlight: $select.search"></small></ui-select></td>
+										</tr>
+										<tr>
+											<td></td>
+											<td></td>
+											<td><h6 style="color: red;" style="color:red;"
+													ng-show="moForm.workCenter.$error.required && !moForm.workCenter.$pristine"
+													class="help-block">{{::languageConstants.get('Please
+													Select Work Center')}}</h6></td>
+										</tr>
+										<tr>
+											<td><h5>{{::languageConstants.get('Label Type')}}</h5></td>
+											<td>:</td>
+											<td><ui-select name="labelType"
+													class="h5-input-md {{theme.h5Dropdown}}"
+													ng-model="MOLabelModule.labelType.selected" theme="bootstrap"
+													on-select="AppCtrl.sampleData1Selected($labelTypeList.PK02)"
+													required> <ui-select-match
+													placeholder="Select Label Type">{{$select.selected.PK02
+												+ ' - ' + $select.selected.AL30}}</ui-select-match> <ui-select-choices
+													repeat="labelTypeList.PK02 as labelTypeList in MOLabelModule.labelTypeList | filter: $select.search track by labelTypeList.PK02">
+												<span
+													ng-bind-html="labelTypeList.PK02 | highlight: $select.search"></span>
+												- <small
+													ng-bind-html="labelTypeList.AL30 | highlight: $select.search"></small></ui-select></td>
+										</tr>
+										<tr>
+											<td></td>
+											<td></td>
+											<td><h6 style="color: red;"
+													ng-show="moForm.labelType.$error.required && !moForm.labelType.$pristine"
+													class="help-block">{{::languageConstants.get('Please
+													Select Label Type.')}}</h6></td>
+										</tr>
+										<tr hidden>
+											<td><h5>{{::languageConstants.get('Trade Name')}}</h5></td>
+											<td>:</td>
+											<td><ui-select name="tradeName"
+													class="h5-input-md {{theme.h5Dropdown}}"
+													ng-model="MOLabelModule.tradeName.selected" theme="bootstrap"
+													on-select="AppCtrl.sampleData1Selected($tradeNames.PK02)">
+												<ui-select-match placeholder="Select Trade Name">{{$select.selected.PK02
+												+ ' - ' + $select.selected.AL31}}</ui-select-match> <ui-select-choices
+													repeat="tradeNames.PK02 as tradeNames in MOLabelModule.tradeNames | filter: $select.search track by tradeNames.PK02">
+												<span
+													ng-bind-html="tradeNames.PK02 | highlight: $select.search"></span>
+												- <small
+													ng-bind-html="tradeNames.AL31 | highlight: $select.search"></small></ui-select></td>
+										</tr>
+										<tr hidden>
+											<td><h5>{{::languageConstants.get('Compound')}}</h5></td>
+											<td>:</td>
+											<td><input name="compound" type="text"
+												class="h5-input-md" ng-model="globalSelection.MOLabel.SPE2"
+												name="SPE2" title="Compound" maxlength="30"></td>
+										</tr>
+										<tr hidden>
+											<td><h5>{{::languageConstants.get('Color')}}</h5></td>
+											<td>:</td>
+											<td><input name="color" type="text" class="h5-input-md"
+												ng-model="globalSelection.MOLabel.SPE3" name="SPE3"
+												title="Color" maxlength="30"></td>
+										</tr>
+										
+										<tr>
+											<td><h5>{{::languageConstants.get('Lot')}}</h5></td>
+											<td>:</td>
+											<td><input name="lot" type="text" class="h5-input-sm"
+												ng-model="globalSelection.MOLabel.BANO" name="BANO"
+												title="Lot" maxlength="20" ng-minlength="7" required></td>
+										</tr>
+										<tr>
+											<td></td>
+											<td></td>
+											<td><h6 style="color: red;"
+													ng-show="moForm.lot.$invalid && !moForm.lot.$pristine"
+													class="help-block">{{::languageConstants.get('Lot is
+													too short.')}}</h6></td>
+										</tr>
+										<tr>
+											<td><h5>{{::languageConstants.get('Addtl Info')}}</h5></td>
+											<td>:</td>
+											<td><input name="addlInfo" type="text"
+												class="h5-input-md" ng-model="globalSelection.MOLabel.ADTL"
+												name="ADTL" title="Addtl Info" maxlength="30"></td>
+										</tr>
+									</table>
+								</td>
+								<td>
+									<table class="inlineTable">
+										<tr>
+											<td><h5>{{::languageConstants.get('Starting Box')}}</h5></td>
+											<td>:</td>
+											<td><input name="startingBox" type="number"
+												class="h5-input-xs" ng-model="globalSelection.MOLabel.BOXN"
+												name="BOXN" title="Starting Box" min="1" step="1"
+												onkeypress="return event.charCode >= 48 && event.charCode <= 57"
+												style="text-align: right" required></td>
+										</tr>
+										<tr>
+											<td></td>
+											<td></td>
+											<td><h6 style="color: red;"
+													ng-show="moForm.startingBox.$invalid && !moForm.startingBox.$pristine"
+													class="help-block">{{::languageConstants.get('Starting
+													Box cannot be blank.')}}</h6></td>
+										</tr>
+										<tr class="h5-color-graphite">
+											<td><h5>{{::languageConstants.get('UOM')}}</h5></td>
+											<td>:</td>
+											<td><input name="uom" type="text" class="h5-input-xs"
+												ng-model="globalSelection.MOLabel.UNMS" name="UMNS"
+												title="Unit of Measurement" maxlength="3" readonly></td>
+										</tr>
+										<tr>
+											<td><h5>{{::languageConstants.get('Gross')}}</h5></td>
+											<td>:</td>
+											<td><input name="gross" type="number"
+												class="h5-input-sm" ng-model="globalSelection.MOLabel.ORQG"
+												ng-change="AppCtrl.netGrossCheck()" name="" title="Gross"
+												step="1" onkeypress="return event.charCode <= 57"
+												maxlength="10" style="text-align: right" min="1"
+												my-validation-check="!MOLabelModule.netLargerThanGross"
+												required></td>
+										</tr>
+										<tr>
+											<td></td>
+											<td></td>
+											<td><h6 style="color: red;"
+													ng-show="moForm.gross.$invalid && !moForm.gross.$pristine"
+													class="help-block">{{::languageConstants.get('Gross
+													must be a valid number.')}}</h6></td>
+										</tr>
+										<tr>
+											<td><h5>{{::languageConstants.get('Net')}}</h5></td>
+											<td>:</td>
+											<td><input name="net" type="number" class="h5-input-sm"
+												ng-model="globalSelection.MOLabel.ORQN"
+												ng-change="AppCtrl.netGrossCheck()" name="" title="Net"
+												step="1" onkeypress="return event.charCode <= 57"
+												maxlength="10" style="text-align: right" min="1" required></td>
+										</tr>
+										<tr>
+											<td></td>
+											<td></td>
+											<td>
+												<h6 style="color: red;"
+													ng-show="moForm.net.$invalid && !moForm.net.$pristine"
+													class="help-block">{{::languageConstants.get('Net must
+													be a valid number.')}}</h6>
+											</td>
+										</tr>
+										<tr>
+											<input readonly ng-show="false"
+												name="netLargerThanGrossCheck" type="checkbox"
+												ng-model="MOLabelModule.netNotLargerThanGross" readonly
+												required>
+											<td></td>
+											<td></td>
+											<td><h6 style="color: red;"
+													ng-show="moForm.netLargerThanGrossCheck.$invalid"
+													class="help-block">{{::languageConstants.get('Net
+													cannot exceed Gross.')}}</h6></td>
+										</tr>
+										<tr>
+											<td><h5>{{::languageConstants.get('# Boxes')}}</h5></td>
+											<td>:</td>
+											<td><input name="numOfBoxes" type="number"
+												class="h5-input-xs" ng-model="globalSelection.MOLabel.BXNO"
+												name="" title="# of Boxes" min="1" max="100" step="1"
+												onkeypress="return event.charCode >= 48 && event.charCode <= 57"
+												style="text-align: right" required></td>
+										</tr>
+										<tr>
+											<td></td>
+											<td></td>
+											<td><h6 style="color: red;"
+													ng-show="moForm.numOfBoxes.$invalid&& !moForm.numOfBoxes.$pristine"
+													class="help-block">{{::languageConstants.get('Number
+													of Boxes must be between 1-100.')}}</h6></td>
+										</tr>
+										<tr>
+											<td><h5>{{::languageConstants.get('Labels per
+													Box')}}</h5></td>
+											<td>:</td>
+											<td><input name="labelsPerBox" type="number"
+												class="h5-input-xs" ng-model="globalSelection.MOLabel.LBPB"
+												name="" title="Labels per Box" min="1" max="100" step="1"
+												onkeypress="return event.charCode >= 48 && event.charCode <= 57"
+												style="text-align: right" required></td>
+										</tr>
+										<tr>
+											<td></td>
+											<td></td>
+											<td><h6 style="color: red;"
+											
+													ng-show="moForm.labelsPerBox.$invalid && !moForm.labelsPerBox.$pristine"
+													class="help-block">{{::languageConstants.get('Labels
+													per Box must be between 1-100.')}}</h6></td>
+										</tr>
+										<tr>
+											<td><h5>{{::languageConstants.get('Last Box')}}</h5></td>
+											<td>:</td>
+											<td><input name="lastBox" type="checkbox"
+												class="h5-input-xs" ng-model="MOLabelModule.printMOLabel.REND"
+												name="REND" title="Last Box" style="text-align: right"></td>
+										</tr>
+										<tr>
+											<td><h5>{{::languageConstants.get('MSD Warning')}}</h5></td>
+											<td>:</td>
+											<td><input name="msdWarning" type="number"
+												class="h5-input-xs" ng-model="globalSelection.MOLabel.EVGR"
+												name="EVGR" title="MSD Warning" maxlength="2" min="0"
+												max="99" step="1"
+												onkeypress="return event.charCode >= 48 && event.charCode <= 57"
+												style="text-align: right"></td>
+										</tr>
+										<tr>
+											<td></td>
+											<td></td>
+											<td><h6 style="color: red;"
+													ng-show="moForm.msdWarning.$invalid && !moForm.msdWarning.$pristine"
+													class="help-block">{{::languageConstants.get('MSD
+													Warning must be between 0-99 or Blank.')}}</h6></td>
+										</tr>
+										
+									</table>
+								</td>
+							</tr>
+						</table>
+						<div class="row">
+							<div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+								<div class="pager h5-margin-auto">
+									<ul>
+										<li><button type="submit"
+												class="h5Button {{theme.button}}"
+												ng-disabled="moForm.$invalid">{{::languageConstants.get('Print')}}</button></li>
+										<li><button type="button"
+												class="h5Button {{theme.button}}"
+												ng-click="AppCtrl.closeModalWindow()">{{::languageConstants.get('Cancel')}}</button>
+									</ul>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</form>
+</div>

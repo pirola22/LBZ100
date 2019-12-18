@@ -1,0 +1,81 @@
+<div id="inventoryLabelDetailsModule">
+	<div class="panel {{theme.panel}}">
+		<div class="panel-heading h5-cursor-pointer"
+			ng-model="modelobject.collapseUIGrid1"
+			ng-mousedown="modelobject.collapseUIGrid1=!modelobject.collapseUIGrid1">
+			<img class="h5-icon" ng-src="img/selection-icon.png"
+				title="{{::languageConstants.get('Heading')}}" alt="" />{{::languageConstants.get('Inventory
+			Item Details')}}
+		</div>
+		<div class="table-responsive h5-padding-md" ng-if="!collapseSel">
+			<div class="row">
+				<div class="col-xs-12 col-sm-12 col-md-12">
+					<table class="inlineTable">
+						<tr class="h5-color-graphite">
+							<td><h5>{{::languageConstants.get('Warehouse')}}</h5></td>
+							<td>:</td>
+							<td><ui-select class="h5-input-md {{theme.h5Dropdown}}"
+									ng-model="inventoryLabelModule.warehouse.selected"
+									theme="bootstrap"
+									on-select="AppCtrl.sampleData1Selected($item.WHLO)">
+								<ui-select-match placeholder="Select Warehouse">{{$select.selected.WHLO
+								+ ' - ' +$select.selected.WHNM}}</ui-select-match> <ui-select-choices
+									repeat="warehouse.WHLO as warehouse in inventoryLabelModule.warehouseList | filter: $select.search track by warehouse.WHLO">
+								<span ng-bind-html="warehouse.WHLO | highlight: $select.search"></span>
+								- <small
+									ng-bind-html="warehouse.WHNM | highlight: $select.search"></small></ui-select></td>
+							<td>
+								<div class="pager h5-margin-auto">
+									<li><button class="h5Button {{theme.button}}"
+											ng-click="AppCtrl.loadApplicationData()">{{::languageConstants.get('Find')}}</button></li>
+								</div>
+							</td>
+						</tr>
+
+					</table>
+				</div>
+			</div>
+
+			<div id="inventoryItemListGrid"
+				ui-grid="inventoryLabelModule.inventoryItemListGrid"
+				ng-class="theme.h5Grid" class="h5Grid"
+				ng-if="!modelobject.collapseUIGrid1" ui-grid-selection
+				ui-grid-resize-columns ui-grid-move-columns ui-grid-auto-resize
+				ui-grid-cellNav ui-grid-exporter ui-grid-save-state ui-grid-pinning
+				ui-grid-edit></div>
+			<!-- ui-grid-edit to edit fields on the grid -->
+		</div>
+		<div class="panel {{theme.panel}}">
+			<div class="panel-heading h5-cursor-pointer"
+				ng-model="modelobject.collapseUIGrid1"
+				ng-mousedown="modelobject.collapseUIGrid1=!modelobject.collapseUIGrid1">
+				<img class="h5-icon" ng-src="img/selection-icon.png"
+					title="{{::languageConstants.get('Heading')}}" alt="" />{{::languageConstants.get('Inventory
+				Item Lot Details')}}
+			</div>
+			<div class="table-responsive h5-padding-md" ng-if="!collapseSel">
+				<div class="row">
+					<div class="col-xs-12 col-sm-12 col-md-12">
+						<table class="inlineTable">
+							<tr class="h5-color-graphite">
+								<td><h5>{{::languageConstants.get('Item')}}</h5></td>
+								<td>:</td>
+								<td><input name="itemNumber" type="text"
+									class="h5-input-sm" ng-model="inventoryLabelModule.itemNumber"
+									name="ITNO" title="Item Number" maxlength="15" readonly></td>
+							</tr>
+
+						</table>
+					</div>
+				</div>
+				<div class="table-responsive h5-padding-md" ng-if="!collapseSel">
+				<div id="inventoryItemLotListGrid"
+					ui-grid="inventoryLabelModule.inventoryItemLotListGrid"
+					ng-class="theme.h5Grid" class="h5Grid"
+					ng-if="!modelobject.collapseUIGrid1" ui-grid-selection
+					ui-grid-resize-columns ui-grid-move-columns ui-grid-auto-resize
+					ui-grid-cellNav ui-grid-exporter ui-grid-save-state ui-grid-pinning
+					ui-grid-edit></div>
+				<!-- ui-grid-edit to edit fields on the grid -->
+			</div>
+		</div>
