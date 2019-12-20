@@ -39,11 +39,13 @@ module h5.application {
                 Odin.Log.error("Error getting language constants " + errorResponse);
                 this.scope.statusBar.push({ message: "Error getting language constants" + errorResponse, statusBarMessageType: h5.application.MessageType.Error, timestamp: new Date() });
             });
+            this.scope.showSideNavLabel = false;
+            /*
             if (this.$window.innerWidth < 768) {
                 this.scope.showSideNavLabel = false;
             } else {
                 this.scope.showSideNavLabel = false;
-            }
+            }*/
         }
 
         /**
@@ -55,6 +57,7 @@ module h5.application {
             this.initAppScope();
             this.initUIGrids();
             this.initScopeFunctions();
+            console.log("-----------------initScopeFunctions ------ends----------");
             this.$timeout(() => { this.scope.appReady = true; }, 5000);
         }
 
@@ -125,12 +128,16 @@ module h5.application {
                 selection: { url: "views/Selection.html" },
                 MOLabelModule: { url: "views/MOLabelModule.html" },
                 InventoryLabelModule: { url: "views/InventoryLabelModule.html" },
+                //Adding Address Label
+                AddressLabelModule: { url: "views/AddressLabelModule.html" },
                 errorModule: { url: "views/Error.html" }
             };
 
             this.scope.modules = [
                 { moduleId: 1, activeIcon: 'SampleModule1.png', inactiveIcon: 'SampleModule1-na.png', heading: 'MO Label Module', content: this.scope.views.MOLabelModule.url, active: true, available: true },
-                { moduleId: 2, activeIcon: 'SampleModule1.png', inactiveIcon: 'SampleModule1-na.png', heading: 'Inventory Label Module', content: this.scope.views.InventoryLabelModule.url, active: true, available: true }
+                { moduleId: 2, activeIcon: 'SampleModule1.png', inactiveIcon: 'SampleModule1-na.png', heading: 'Inventory Label Module', content: this.scope.views.InventoryLabelModule.url, active: true, available: true },
+                //Adding address label
+                { moduleId: 3, activeIcon: 'SampleModule1.png', inactiveIcon: 'SampleModule1-na.png', heading: 'Address Label Module', content: this.scope.views.AddressLabelModule.url, active: true, available: true }
             ];
 
             this.scope.appConfig = {};
@@ -141,6 +148,8 @@ module h5.application {
             this.initGlobalSelection();
             this.initMOLabelModule();
             this.initInventoryLabelModule();
+            //Adding address label
+            this.initAddressLabelModule();
         }
 
         /**
@@ -162,7 +171,9 @@ module h5.application {
                     inventoryItemLotList: false,
 
                     inventoryLabel: false,
-
+                    openDeliveryList: false,
+                    deliveryLineList: false,
+                    addressLabel: false,
                     item: false,
                     defaultPrinter: false
                 },
@@ -181,7 +192,11 @@ module h5.application {
                 inventoryItemLotList: {},
                 inventoryItem: {},
                 inventoryLabel: {},
-
+                //Address Label
+                openDeliveryList: {},
+                deliveryLineList: {},
+                openDelivery: {},
+                addressLabel: {},
 
                 item: {},
                 printerExists: false
@@ -270,7 +285,40 @@ module h5.application {
                 itemAltWeight: {}
             };
         }
+        /**
+            * Initialize the AddressLabel module
+            */
+        private initAddressLabelModule() {
+            this.scope.addressLabelModule = {
+                reload: true,
+                transactionStatus: {
+                    warehouseList: false,
+                    AddressList: false,
+                    addressLabel: false
+                },
+                warehouseList: [],
+                warehouse: {},
+                deliveryNumber: {},
+                itemNumber: {},
+                orderNumber: {},
+                orderLine: {},
+                lineSfx: {},
+                popn: {},
+                cuor: {},
 
+                openDeliveryList: [],
+                openDeliveryListGrid: {},
+                selectedOpenDeliveryListRow: {},
+                selectedOpenDelivery: {},
+
+                deliveryLineList: [],
+                deliveryLineListGrid: {},
+                selectedOpenDeliveryLotListRow: {},
+                selectedOpenDeliveryLot: {},
+
+                printAddressLabel: {},
+            };
+        }
         /**
         * Initialize the application constants/MOLabels
         */
@@ -281,12 +329,17 @@ module h5.application {
         * Initialize the binding of controller function mapping with the module scope
         */
         private initScopeFunctions() {
+            console.log("-----------------initScopeFunctions----------------");
             //Add function binding to the scope models which are required to access from grid scope
             //this.scope.sampleModule1.computeFunction1() = () => { this.computeFunction1(); }
 
             this.scope.MOLabelModule.displayMOLabel = (fieldName, rowEntity) => { this.displayMOLabel(fieldName, rowEntity); };
             this.scope.inventoryLabelModule.displayInventoryItemLot = (fieldName, rowEntity) => { this.displayInventoryItemLot(fieldName, rowEntity); };
             this.scope.inventoryLabelModule.displayInventoryItemLabel = (fieldName, rowEntity) => { this.displayInventoryItemLabel(fieldName, rowEntity); }
+            //Address label
+            this.scope.addressLabelModule.displayOpenDeliveryLabel = (fieldName, rowEntity) => { this.displayOpenDeliveryLabel(fieldName, rowEntity); }
+            this.scope.addressLabelModule.displayOpenDeliveryLine = (fieldName, rowEntity) => { this.displayOpenDeliveryLine(fieldName, rowEntity); };
+
         }
 
         /**
@@ -298,6 +351,9 @@ module h5.application {
             this.scope.MOLabelModule.MOListGrid = this.gridService.getMOListGrid();
             this.scope.inventoryLabelModule.inventoryItemListGrid = this.gridService.getInventoryItemListGrid();
             this.scope.inventoryLabelModule.inventoryItemLotListGrid = this.gridService.getInventoryItemLotListGrid();
+            //Address label
+            this.scope.addressLabelModule.openDeliveryListGrid = this.gridService.getOpenDeliveryListGrid();
+            this.scope.addressLabelModule.deliveryLineListGrid = this.gridService.getDeliveryLineListGrid();
             this.initUIGridsOnRegisterApi();
         }
 
@@ -379,7 +435,55 @@ module h5.application {
                     //this.itemMasterListRowSelected(gridApi.selection.getSelectedRows());
                 });
             }
+            //Address label
 
+            this.scope.addressLabelModule.openDeliveryListGrid.onRegisterApi = (gridApi) => {
+                this.gridService.adjustOpenDeliveryGridHeight("openDeliveryListGrid", this.scope.addressLabelModule.openDeliveryListGrid.data.length, 500);
+                gridApi.core.on.renderingComplete(this.scope, (handler: any) => { this.gridService.restoreGridState("openDeliveryListGrid", gridApi); });
+                gridApi.core.on.sortChanged(this.scope, (handler: any) => { this.gridService.saveGridState("openDeliveryListGrid", gridApi); });
+                gridApi.core.on.columnVisibilityChanged(this.scope, (handler: any) => { this.gridService.saveGridState("openDeliveryListGrid", gridApi); });
+                gridApi.core.on.filterChanged(this.scope, (handler: any) => { this.gridService.saveGridState("openDeliveryListGrid", gridApi); });
+                gridApi.colMovable.on.columnPositionChanged(this.scope, (handler: any) => { this.gridService.saveGridState("openDeliveryListGrid", gridApi); });
+                gridApi.colResizable.on.columnSizeChanged(this.scope, (handler: any) => { this.gridService.saveGridState("openDeliveryListGrid", gridApi); });
+                gridApi.cellNav.on.viewPortKeyDown(this.scope, (event: any) => {
+                    if ((event.keyCode === 67) && (event.ctrlKey || event.metaKey)) {
+                        let cells = gridApi.cellNav.getCurrentSelection();
+                        this.copyCellContentToClipBoard(cells);
+                    }
+                });
+                gridApi.selection.on.rowSelectionChanged(this.scope, (row: any) => {
+                    this.gridService.saveGridState("openDeliveryListGrid", gridApi);
+
+                });
+                gridApi.selection.on.rowSelectionChangedBatch(this.scope, (row: any) => {
+                    this.gridService.saveGridState("openDeliveryListGrid", gridApi);
+
+                });
+            }
+
+            this.scope.addressLabelModule.deliveryLineListGrid.onRegisterApi = (gridApi) => {
+                this.gridService.adjustOpenDeliveryGridHeight("deliveryLineListGrid", this.scope.addressLabelModule.deliveryLineListGrid.data.length, 500);
+                gridApi.core.on.renderingComplete(this.scope, (handler: any) => { this.gridService.restoreGridState("deliveryLineListGrid", gridApi); });
+                gridApi.core.on.sortChanged(this.scope, (handler: any) => { this.gridService.saveGridState("deliveryLineListGrid", gridApi); });
+                gridApi.core.on.columnVisibilityChanged(this.scope, (handler: any) => { this.gridService.saveGridState("deliveryLineListGrid", gridApi); });
+                gridApi.core.on.filterChanged(this.scope, (handler: any) => { this.gridService.saveGridState("deliveryLineListGrid", gridApi); });
+                gridApi.colMovable.on.columnPositionChanged(this.scope, (handler: any) => { this.gridService.saveGridState("deliveryLineListGrid", gridApi); });
+                gridApi.colResizable.on.columnSizeChanged(this.scope, (handler: any) => { this.gridService.saveGridState("deliveryLineListGrid", gridApi); });
+                gridApi.cellNav.on.viewPortKeyDown(this.scope, (event: any) => {
+                    if ((event.keyCode === 67) && (event.ctrlKey || event.metaKey)) {
+                        let cells = gridApi.cellNav.getCurrentSelection();
+                        this.copyCellContentToClipBoard(cells);
+                    }
+                });
+                gridApi.selection.on.rowSelectionChanged(this.scope, (row: any) => {
+                    this.gridService.saveGridState("deliveryLineListGrid", gridApi);
+
+                });
+                gridApi.selection.on.rowSelectionChangedBatch(this.scope, (row: any) => {
+                    this.gridService.saveGridState("deliveryLineListGrid", gridApi);
+
+                });
+            }
         }
 
         /**
@@ -420,7 +524,7 @@ module h5.application {
         * Initialize module on application start
         */
         private initModule() {
-
+            console.log("initModule------- ->>>>>>>>>>>>>  ");
             let moduleId = this.storageService.getLocalData('h5.app.appName.module.selected');
             moduleId = angular.isNumber(moduleId) ? moduleId : 1;
             this.scope.activeModule = moduleId;
@@ -596,7 +700,18 @@ module h5.application {
             }
             this.scope.modalWindow = this.$uibModal.open(options);
         }
-
+        //Address label
+        private openAddressLabelModal() {
+            console.log("openAddressLabelModal");
+            let options: any = {
+                animation: true,
+                templateUrl: "views/AddressLabelModal.html",
+                size: "md",
+                scope: this.scope,
+                backdrop: "static"
+            }
+            this.scope.modalWindow = this.$uibModal.open(options);
+        }
         /**
         * Opens About Page in a modal window
         */
@@ -720,10 +835,10 @@ module h5.application {
             this.showError(error, errorMessages);
             this.scope.statusBar.push({ message: error + " " + errorMessages, statusBarMessageType: h5.application.MessageType.Error, timestamp: new Date() });
         }
-    private openDatepicker() {
-        //this.scope.status.opened = true;
-        this.scope.globalSelection.inventoryLabel.REDAOpen = true;
-    };
+        private openDatepicker() {
+            //this.scope.status.opened = true;
+            this.scope.globalSelection.inventoryLabel.REDAOpen = true;
+        };
         /**
         * Show the error message in application error panel
         * @param error the error prefix/description to show
@@ -833,7 +948,7 @@ module h5.application {
             let userContext = this.scope.userContext;
             let appConfig = this.scope.appConfig;
             // this.getPrinter(userContext.m3User); 
-            console.log(" loadDefaultFields this.scope.globalSelection.defaultPrinter >>>>>>>>>>>>>user " + this.scope.globalSelection.defaultPrinter);
+
 
             // this.scope.globalSelection.defaultPrinter = { selected: this.scope.globalSelection.defaultPrinter };            
             let facility = angular.isString(appConfig.searchQuery.faci) ? appConfig.searchQuery.faci : userContext.FACI; //added
@@ -842,7 +957,9 @@ module h5.application {
             let warehouse = angular.isString(appConfig.searchQuery.whlo) ? appConfig.searchQuery.whlo : userContext.WHLO;
             this.scope.inventoryLabelModule.warehouse = { selected: warehouse };
             this.loadWarehouseList(userContext.company); //added
-
+            //ADDRESS LABEL
+            this.scope.addressLabelModule.warehouse = { selected: warehouse };
+            this.scope.globalSelection.addressLabel.warehouse = { selected: warehouse };
 
         }
 
@@ -929,6 +1046,7 @@ module h5.application {
                     this.loadInventoryLabelModule(this.scope.inventoryLabelModule.reload);
                     break;
                 case 3:
+                    this.loadAddressLabelModule(this.scope.addressLabelModule.reload);
                     break;
                 case 4:
                     break;
@@ -1172,7 +1290,62 @@ module h5.application {
                 this.scope.statusBar.push({ message: error + " " + err.errorMessage, statusBarMessageType: h5.application.MessageType.Error, timestamp: new Date() });
             });
         }
-
+        //aDDRESS LABEL
+        private loadOpenDeliveryLotList(deliveryNumber: string): void {
+            console.log("loadOpenDeliveryLotList------------------------------------->>>>>>>>>>>>>>");
+            this.scope.loadingData = true;
+            let trqt = "";
+            this.scope.globalSelection.deliveryLineList = true;
+            let count = 0;
+            // get userdate format
+            this.scope.userContext.dateFormat;
+            this.appService.getDeliveryLineList(deliveryNumber).then((val: M3.IMIResponse) => {
+                this.scope.globalSelection.deliveryLineList = val.items;
+                this.scope.addressLabelModule.orderLine = val.item.RIDL;
+                val.items.forEach((value: any) => {
+                    trqt = value.URTRQT;
+                    val.items[count].URTRQT = trqt.substring(0, (trqt.length - 4));
+                    count++;
+                });
+                this.scope.addressLabelModule.deliveryLineListGrid.data = val.items; //added after adding the list
+                this.gridService.adjustOpenDeliveryGridHeight("deliveryLineListGrid", val.items.length, 500) //added to adjust grid height
+                this.scope.globalSelection.transactionStatus.deliveryLineList = false;
+                this.refreshTransactionStatus();
+            }, (err: M3.IMIResponse) => {
+                this.scope.globalSelection.transactionStatus.deliveryLineList = false;
+                this.refreshTransactionStatus();
+                let error = "API: " + err.program + "." + err.transaction + ", Input: " + JSON.stringify(err.requestData) + ", Error Code: " + err.errorCode;
+                this.showError(error, [err.errorMessage]);
+                this.scope.statusBar.push({ message: error + " " + err.errorMessage, statusBarMessageType: h5.application.MessageType.Error, timestamp: new Date() });
+            });
+        }
+        private loadOpenDeliveryList(warehouse: string): void {
+            console.log("____________________loadOpenDeliveryList______________________");
+            let count = 0;
+            this.scope.loadingData = true;
+            this.scope.globalSelection.openDeliveryList = true;
+            this.appService.getOpenDeliveryList(warehouse).then((val: M3.IMIResponse) => {
+                this.scope.globalSelection.openDeliveryList = val.items;
+console.log(val);
+                val.items.forEach((value: any) => {
+                    val.items[count].OQDSDT = this.formatDatePerUserSetting(value.OQDSDT);
+                    if (value.OKCUNM === "") {
+                        val.items[count].OKCUNM = value.OACONM;
+                    }
+                    count++;
+                });
+                this.scope.addressLabelModule.openDeliveryListGrid.data = val.items; //added after adding the list
+                this.gridService.adjustOpenDeliveryGridHeight("openDeliveryListGrid", val.items.length, 500) //added to adjust grid height
+                this.scope.globalSelection.transactionStatus.openDeliveryList = false;
+                this.refreshTransactionStatus();
+            }, (err: M3.IMIResponse) => {
+                this.scope.globalSelection.transactionStatus.openDeliveryList = false;
+                this.refreshTransactionStatus();
+                let error = "API: " + err.program + "." + err.transaction + ", Input: " + JSON.stringify(err.requestData) + ", Error Code: " + err.errorCode;
+                this.showError(error, [err.errorMessage]);
+                this.scope.statusBar.push({ message: error + " " + err.errorMessage, statusBarMessageType: h5.application.MessageType.Error, timestamp: new Date() });
+            });
+        }
         /** 
         * Load the item (item)
         * @param company the company
@@ -1226,14 +1399,98 @@ module h5.application {
             this.openInventoryLabelModal();
         }
 
+        private formatDatePerUserSetting(date: string): string {
+            let dateFmnt = this.scope.userContext.dateFormat;
+            let formattedDatedformattedDated = "";
+            let formattedDated = "";
+            let yy = date.substring(0, 4);
+            let MM = date.substring(4, 6);
+            let dd = date.substring(6);
+            switch (dateFmnt) {
+                case "MMddyy": {
+                    //MDY
+                    formattedDated = MM + "/" + dd + "/" + yy;
+                    break;
+                }
+                case "yyMMdd": {
+                    //YMD
+                    formattedDated = yy + "/" + MM + "/" + dd;
+                    break;
+                }
+                case "ddMMyy": {
+                    //DMY
+                    formattedDated = dd + "/" + MM + "/" + yy;
+                    break;
+                }
+                default: {
+                    //DMY
+                    formattedDated = dd + "/" + MM + "/" + yy;
+                    break;
+                }
+            }
+            return formattedDated;
+        }
+        //Address label
+        private displayOpenDeliveryLabel(fieldName: string, selectedRow: any) {
+            console.log("-----------------displayOpenDeliveryLabel----------------");
 
+            this.scope.addressLabelModule.deliveryNumber = selectedRow.OQDLIX;
+            this.scope.addressLabelModule.orderNumber = selectedRow.OQRIDN;
+            this.scope.addressLabelModule.selectedOpenDeliveryLotListRow = selectedRow;
+            this.loadOpenDeliveryLotList(this.scope.addressLabelModule.deliveryNumber);
+        }
+
+        private displayOpenDeliveryLine(fieldName: string, selectedRow: any) {
+            console.log("-----------------displayOpenDeliveryLine----------------");
+            this.scope.addressLabelModule.itemNumber = selectedRow.URITNO;
+            this.scope.addressLabelModule.selectedOpenDeliveryLotListRow = selectedRow;
+            this.loadAddressLabel(selectedRow.URDLIX, selectedRow.URITNO);
+            this.scope.addressLabelModule.lineSfx = selectedRow.URRIDX;
+            this.scope.addressLabelModule.orderLine = selectedRow.URRIDL;
+            this.loadLine(selectedRow.URRIDN, selectedRow.URRIDL);
+            //open the modal
+            this.openAddressLabelModal();
+        }
+        private loadLine(orderNumber: string, orderLine: string): void {
+            this.scope.globalSelection.addressLabel.RIDN = orderNumber;
+            this.scope.globalSelection.addressLabel.orderNumber = orderNumber;
+            console.log("loadLine----------------");
+            this.scope.loadingData = true;
+            this.scope.globalSelection.transactionStatus.item = true;
+            let orderNum = this.scope.globalSelection.addressLabel.RIDN;
+            let itemNumber = this.scope.globalSelection.addressLabel.ITNO;
+            let deliveryNumber = this.scope.globalSelection.addressLabel.DLIX;
+
+            // call API'S to get customer info
+            this.appService.getLine(orderNumber, orderLine).then((val: M3.IMIResponse) => {
+                this.scope.addressLabelModule.popn = val.item.POPN;
+                this.scope.addressLabelModule.cuor = val.item.CUOR;
+                this.scope.globalSelection.item = val.items;
+                //set field to api results
+                this.scope.globalSelection.addressLabel = {
+                    DLIX: deliveryNumber,
+                    ITNO: itemNumber,
+                    CUOR: this.scope.addressLabelModule.cuor,
+                    POPN: this.scope.addressLabelModule.popn,
+                    LBPB: 1,
+                };
+                this.scope.globalSelection.transactionStatus.item = false;
+                this.refreshTransactionStatus();
+            }, (err: M3.IMIResponse) => {
+                this.scope.globalSelection.addressLabel = {
+                    DLIX: deliveryNumber,
+                    ITNO: itemNumber,
+                    LBPB: 1
+                };
+                this.scope.globalSelection.transactionStatus.item = false;
+                this.refreshTransactionStatus();
+            })
+        }
         private displayInventoryItemLot(fieldName: string, selectedRow: any): void { //POPUP
-
+            console.log("-----------------displayInventoryItemLot----------------");
             this.scope.inventoryLabelModule.selectedInventoryItemListRow = selectedRow;
             this.scope.inventoryLabelModule.itemNumber = selectedRow.MLITNO;
             this.scope.inventoryLabelModule.location = selectedRow.MLWHSL;
-            // console.log(selectedRow);               
-
             this.loadInventoryItemLotList(this.scope.inventoryLabelModule.itemNumber);
         }
 
@@ -1247,6 +1504,7 @@ module h5.application {
             this.scope.inventoryLabelModule.transactionStatus.warehouseList = true;
             this.appService.getWarehouseList(company).then((val: M3.IMIResponse) => {
                 this.scope.inventoryLabelModule.warehouseList = val.items;
+                this.scope.addressLabelModule.warehouseList = val.items;
                 //  console.log(val.items);
                 this.scope.inventoryLabelModule.transactionStatus.warehouseList = false;
                 this.refreshTransactionStatus();
@@ -1340,7 +1598,7 @@ module h5.application {
 
         private loadInventoryLabel(warehouse: string, itemNumber: string, itemDescription: string, lotNumber: string, receiptDate: string, referenceOrder: string, lotRef1: string, lotRef2: string, UOM: string, quantity: string): void {
             console.log(receiptDate);
-            
+
             let year = receiptDate.slice(0, 4);
             let month = receiptDate.slice(4, 6);
             let day = receiptDate.slice(6, 8);
@@ -1364,25 +1622,34 @@ module h5.application {
 
             };
         }
+        //Address Label
+        private loadAddressLabel(deliveryNumber: string, itemNumber: string): void {
+            console.log("loadAddressLabel");
 
+            this.scope.globalSelection.addressLabel = {
+
+                DLIX: deliveryNumber,
+                ITNO: itemNumber,
+            };
+        }
         private chgInventoryLabelAlpha(warehouse: string, itemNumber: string, location: string, receiptDate: string, lotNumber: string, referenceOrder: string, lotRef1: string, lotRef2: string, onHandBalance: string, labelType: string, userID: string, printer: string, labelsPerBox: string): void {
-  console.log("iN chgInventoryLabelAlpha");
+            console.log("iN chgInventoryLabelAlpha");
             this.scope.loadingData = true;
             this.scope.inventoryLabelModule.transactionStatus.inventoryLabel = true;
             this.appService.chgInventoryLabelAlpha(warehouse, itemNumber, location, receiptDate, lotNumber, referenceOrder, lotRef1, lotRef2, onHandBalance).then((val: M3.IMIResponse) => {
                 this.scope.inventoryLabelModule.transactionStatus.inventoryLabel = false;
-                  this.printInventoryLabel(labelType, warehouse, location, lotNumber, itemNumber, userID, printer, labelsPerBox);
+                this.printInventoryLabel(labelType, warehouse, location, lotNumber, itemNumber, userID, printer, labelsPerBox);
 
             }, (err: M3.IMIResponse) => {
                 this.scope.inventoryLabelModule.transactionStatus.inventoryLabel = false;
-                    this.refreshTransactionStatus();
-                    let error = "API: " + err.program + "." + err.transaction + ", Input: " + JSON.stringify(err.requestData) + ", Error Code: " + err.errorCode;
-                    this.showError(error, [err.errorMessage]);
-                    this.scope.statusBar.push({ message: error + " " + err.errorMessage, statusBarMessageType: h5.application.MessageType.Error, timestamp: new Date() });
+                this.refreshTransactionStatus();
+                let error = "API: " + err.program + "." + err.transaction + ", Input: " + JSON.stringify(err.requestData) + ", Error Code: " + err.errorCode;
+                this.showError(error, [err.errorMessage]);
+                this.scope.statusBar.push({ message: error + " " + err.errorMessage, statusBarMessageType: h5.application.MessageType.Error, timestamp: new Date() });
 
-             this.appService.addInventoryLabelAlpha(warehouse, itemNumber, location, receiptDate, lotNumber, referenceOrder, lotRef1, lotRef2, onHandBalance).then((val: M3.IMIResponse) => {
+                this.appService.addInventoryLabelAlpha(warehouse, itemNumber, location, receiptDate, lotNumber, referenceOrder, lotRef1, lotRef2, onHandBalance).then((val: M3.IMIResponse) => {
                     this.scope.inventoryLabelModule.transactionStatus.inventoryLabel = false;
-  this.printInventoryLabel(labelType, warehouse, location, lotNumber, itemNumber, userID, printer, labelsPerBox);
+                    this.printInventoryLabel(labelType, warehouse, location, lotNumber, itemNumber, userID, printer, labelsPerBox);
                 }, (err: M3.IMIResponse) => {
                     this.scope.inventoryLabelModule.transactionStatus.inventoryLabel = false;
                     this.refreshTransactionStatus();
@@ -1392,7 +1659,7 @@ module h5.application {
 
                 })
             }).finally(() => {
-              //  this.printInventoryLabel(labelType, warehouse, location, lotNumber, itemNumber, userID, printer, labelsPerBox);
+                //  this.printInventoryLabel(labelType, warehouse, location, lotNumber, itemNumber, userID, printer, labelsPerBox);
                 this.refreshTransactionStatus();//must be in both statements IF NOT IN FINALLY
 
             });
@@ -1636,7 +1903,7 @@ module h5.application {
                 });
             }).finally(() => {
                 // console.log(labelsPerBox);
-                  this.printMOLabel(labelType, facility, moNumber, boxNumber.toString(), itemNumber, this.scope.userContext.m3User, this.scope.globalSelection.printer.selected.DEV, labelsPerBox);                         
+                this.printMOLabel(labelType, facility, moNumber, boxNumber.toString(), itemNumber, this.scope.userContext.m3User, this.scope.globalSelection.printer.selected.DEV, labelsPerBox);
                 this.refreshTransactionStatus();//must be in both statements IF NOT IN FINALLY
             });
             return ret;
@@ -1835,6 +2102,23 @@ module h5.application {
 
             this.scope.inventoryLabelModule.reload = false;
         }
+        //Address Label
+        private loadAddressLabelModule(reLoad: boolean): void {
+            let userContext = this.scope.userContext;
+            this.scope.addressLabelModule.deliveryNumber = "";
+
+            if (reLoad) {
+                this.clearData(["addressLabelModule"]);
+                let selectedWarehouse = this.scope.addressLabelModule.warehouse;
+                if (selectedWarehouse.selected) {
+                    this.loadOpenDeliveryList(selectedWarehouse.selected);
+                }
+            }
+
+
+
+            this.scope.inventoryLabelModule.reload = false;
+        }
 
         private submitMOForm(isValid: boolean): void {
             if (isValid) {
@@ -1851,6 +2135,107 @@ module h5.application {
                 console.log("not printed");
             }
         }
+        private submitAddressForm(isValid: boolean): void {
+            if (isValid) {
+                console.log("submitAddressForm");
+                this.onAddressPrint();
+            } else {
+                console.log("not printed");
+            }
+        }
+        private onAddressPrint(): void {
+            console.log("onAddressPrint");
+            let userContext = this.scope.userContext;
+            let warehouse = this.scope.addressLabelModule.warehouse.selected;
+            let itemNumber = this.scope.globalSelection.addressLabel.ITNO;
+            let ridn = this.scope.addressLabelModule.orderNumber;//this.scope.globalSelection.addressLabel.RIDN;
+            let ridl = this.scope.addressLabelModule.orderLine;
+            let dlix = this.scope.globalSelection.addressLabel.DLIX;
+            let ridx = this.scope.addressLabelModule.lineSfx;
+            let labelsPerBox = this.scope.globalSelection.addressLabel.LBPB;
+            let userID = this.scope.userContext.m3User;
+            let printer = this.scope.globalSelection.printer.selected.DEV;
+            //save CUGEX1 record 
+            this.saveAddressLabelXML(warehouse, ridn, ridl, dlix, ridx, userID, printer, labelsPerBox);
+            this.closeModalWindow();
+        }
+
+        private saveAddressLabelXML(warehouse, ridn, ridl, dlix, ridx, userID, printer, labelsPerBox): void {
+            console.log("------------------------saveAddressLabelXML---------------------- " + dlix);
+            this.scope.loadingData = true;
+            this.scope.globalSelection.transactionStatus.addressLabel = true;
+            //CALL API TO GET INFO
+            let fname = "";
+            let fcua1 = "";
+            let fcua2 = "";
+            let fcua3 = "";
+            let tname = "";
+            let tcua1 = "";
+            let tcua2 = "";
+            let tcua3 = "";
+            let itemNumber = this.scope.addressLabelModule.itemNumber;
+            this.appService.getAddress(dlix).then((val: M3.IMIResponse) => {
+                tname = val.item.NAME.substring(0, 30);
+                tcua1 = val.item.ADR1.substring(0, 30);
+                tcua2 = val.item.ADR2.substring(0, 30);
+                tcua3 = val.item.ADR3.substring(0, 30);
+                // trim to 30 chracters (max size allowed
+
+                let popn = this.scope.globalSelection.addressLabel.POPN;
+                let cuor = this.scope.globalSelection.addressLabel.CUOR;
+                //Add / Save Record
+                this.appService.addAddressXMLRecord(warehouse, ridn, ridl, dlix, ridx, userID, tname, tcua1, tcua2, tcua3, popn, cuor).then((val: M3.IMIResponse) => {
+                    for (let y = 1; y <= labelsPerBox; y++) {
+                        this.callAddressLabelPrint(itemNumber, printer, ridn, ridl, dlix, ridx, labelsPerBox);
+                    }
+                }, (err: M3.IMIResponse) => {
+                    this.appService.chgAddressXMLRecord(warehouse, ridn, ridl, dlix, ridx, userID, tname, tcua1, tcua2, tcua3, popn, cuor).then((val: M3.IMIResponse) => {
+                        console.log("XML record SAVED  ");
+                        for (let y = 1; y <= labelsPerBox; y++) {
+                            this.callAddressLabelPrint(itemNumber, printer, ridn, ridl, dlix, ridx, labelsPerBox);
+                        }
+                    }, (err: M3.IMIResponse) => {
+                        console.log("Failed to add and save XMLPRT");
+                        let error = "API: " + err.program + "." + err.transaction + ", Input: " + JSON.stringify(err.requestData) + ", Error Code: " + err.errorCode;
+                        this.showError(error, [err.errorMessage]);
+                        this.scope.statusBar.push({ message: error + " " + err.errorMessage, statusBarMessageType: h5.application.MessageType.Error, timestamp: new Date() });
+                    })
+                }).finally(() => {
+                    this.refreshTransactionStatus();//must be in both statements IF NOT IN FINALLY
+
+                });
+                this.scope.globalSelection.transactionStatus.addressLabel = false;
+                this.loadMOList(warehouse); //reload
+            }, (err: M3.IMIResponse) => {
+                this.scope.globalSelection.transactionStatus.addressLabel = false;
+                let error = "API: " + err.program + "." + err.transaction + ", Input: " + JSON.stringify(err.requestData) + ", Error Code: " + err.errorCode;
+                this.showError(error, [err.errorMessage]);
+                this.scope.statusBar.push({ message: error + " " + err.errorMessage, statusBarMessageType: h5.application.MessageType.Error, timestamp: new Date() });
+
+            }).finally(() => {
+                this.refreshTransactionStatus();//must be in both statements IF NOT IN FINALLY
+
+            });
+
+
+        }
+        private callAddressLabelPrint(itemNumber: string, printer: string, labelType: string, warehouse: string, location: string, lotNumber: string, labelsPerBox: any) {
+            console.log("callAddressLabelPrint");
+            this.scope.loadingData = true;
+            this.scope.globalSelection.transactionStatus.addressLabel = true;
+            this.appService.printAddressLabel(itemNumber, printer, labelType, warehouse, location, lotNumber, labelsPerBox).then((val: M3.IMIResponse) => {
+                this.showInfo("Address Label Successfully Printed", ["Address Label Printed"]);
+                this.scope.globalSelection.transactionStatus.addressLabel = false;
+            }, (err: M3.IMIResponse) => {
+                this.scope.globalSelection.transactionStatus.addressLabel = false;
+                let error = "API: " + err.program + "." + err.transaction + ", Input: " + JSON.stringify(err.requestData) + ", Error Code: " + err.errorCode;
+                this.showError(error, [err.errorMessage]);
+                this.scope.statusBar.push({ message: error + " " + err.errorMessage, statusBarMessageType: h5.application.MessageType.Error, timestamp: new Date() });
+            }).finally(() => {
+                this.refreshTransactionStatus();//must be in both statements IF NOT IN FINALLY
+            });
+
+        }
 
         private onInventoryPrint(): void {
             let userContext = this.scope.userContext;
@@ -1860,7 +2245,7 @@ module h5.application {
             let itemDescription = this.scope.globalSelection.inventoryLabel.ITDS;
             let lotNumber = this.scope.globalSelection.inventoryLabel.BANO;
             let receiptDate = new Date(this.scope.globalSelection.inventoryLabel.REDA).toLocaleDateString('en-US');
-            let receiptDate2: Date = new Date(this.scope.globalSelection.inventoryLabel.REDA );
+            let receiptDate2: Date = new Date(this.scope.globalSelection.inventoryLabel.REDA);
             let referenceOrder = this.scope.globalSelection.inventoryLabel.RORN;
             let lotRef1 = this.scope.globalSelection.inventoryLabel.BREF;
             let lotRef2 = this.scope.globalSelection.inventoryLabel.BRE2;
@@ -1872,10 +2257,10 @@ module h5.application {
             let labelType = "P95";
             let userID = this.scope.userContext.m3User;
             let printer = this.scope.globalSelection.printer.selected.DEV; 2
-            receiptDate =  new Date(receiptDate).toLocaleDateString('en-US');
-       
+            receiptDate = new Date(receiptDate).toLocaleDateString('en-US');
+
             let dateYear = receiptDate2.getFullYear();
-            let dateMonth = receiptDate2.getMonth()+1;
+            let dateMonth = receiptDate2.getMonth() + 1;
             let dateDay = receiptDate2.getDate();
             console.log("  receiptDate2getDate= " + receiptDate2.getDate());
             console.log("  dateYear = " + dateYear);
@@ -1884,8 +2269,8 @@ module h5.application {
             let dateFMT = (dateMonth + "/" + dateDay + "/" + dateYear);
             receiptDate = dateFMT;
             console.log("onInventoryPrint  receiptDate = " + receiptDate);
-            console.log("new Date(this.scope.globalSelection.inventoryLabel.REDA )= " +new Date(this.scope.globalSelection.inventoryLabel.REDA ).toDateString());
-            this.chgInventoryLabelAlpha(warehouse, itemNumber, location, receiptDate, lotNumber, referenceOrder, lotRef1, lotRef2, quantity, labelType, userID, printer, labelsPerBox);            if (multipleLabels === false) {
+            console.log("new Date(this.scope.globalSelection.inventoryLabel.REDA )= " + new Date(this.scope.globalSelection.inventoryLabel.REDA).toDateString());
+            this.chgInventoryLabelAlpha(warehouse, itemNumber, location, receiptDate, lotNumber, referenceOrder, lotRef1, lotRef2, quantity, labelType, userID, printer, labelsPerBox); if (multipleLabels === false) {
                 this.closeModalWindow();
             }
         }
@@ -1964,7 +2349,7 @@ module h5.application {
             let user = this.scope.userContext.m3User;
             let userPrinter = this.scope.globalSelection.printer.selected;
             //add printer
-             // check printer 
+            // check printer 
             console.log("userPrinter " + userPrinter);
             //update to selected printer
             this.appService.updPrintFile(user, userPrinter).then((val: any) => {

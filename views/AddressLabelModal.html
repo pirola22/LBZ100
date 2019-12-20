@@ -1,0 +1,112 @@
+<div class="modal-header">
+	<button type="button" class="close"
+		ng-click="AppCtrl.closeModalWindow()">&times;</button>
+	<h4 class="modal-title">{{::languageConstants.get('Address
+		Label')}}</h4>
+	<table class="inlineTable">
+		<tr class="h5-color-graphite">
+			<td><h5>{{::languageConstants.get('Item #')}}</h5></td>
+			<td><input name="Item Number" type="text" class="h5-input-xs"
+				ng-model="globalSelection.addressLabel.ITNO" name="ITNO"
+				title="ItemNumber" maxlength="30" readonly></td>
+			<td>
+				<h5>{{::languageConstants.get('Delivery #')}}</h5>
+			</td>
+			<td><input name="Delivery" type="text" class="h5-input-xs"
+				ng-model="globalSelection.addressLabel.DLIX" name="DLIX"
+				title="Delivery" maxlength="30" readonly></td>
+				<td>
+				<h5>{{::languageConstants.get('Order #')}}</h5>
+			</td>
+			<td><input name="Order Number" type="text" class="h5-input-xs"
+				ng-model="addressLabelModule.orderNumber" name="RIDN"
+				title="Order Number" maxlength="30" readonly></td>
+		</tr>
+	</table>
+</div>
+
+<div class="modal-body">
+	<div class="container-fluid">
+		<div class="alert alert-danger" role="alert"
+			ng-if="modelobject.childmodelobject.hasError">
+			<span>{{modelobject.childmodelobject.errorMessage}}</span>
+			<button type="button" class="close"
+				ng-click="modelobject.childmodelobject.hasError=false">
+				<span aria-hidden="true">&times;</span>
+			</button>
+		</div>
+	</div>
+	<form name="addressForm"
+		ng-submit="AppCtrl.submitAddressForm(addressForm.$valid)" novalidate>
+		<div class="panel {{theme.panel}}">
+			<div class="table-responsive h5-padding-md">
+				<div class="row">
+					<div class="col-xs-12 col-sm-12 col-md-12 col-md-12">
+						<table class="inlineTable">
+							<tr>
+
+								<td>
+									<table class="inlineTable">
+
+										<tr>
+											<td><h5>{{::languageConstants.get('Purchase
+													Order#')}}</h5></td>
+											<td>:</td>
+											<td><input name="description" type="text"
+												class="h5-input-md"
+												ng-model="globalSelection.addressLabel.POPN" name="POPN"
+												title="Alias number" maxlength="30"></td>
+										</tr>
+										<tr >
+											<td><h5>{{::languageConstants.get('Customers order#
+													')}}</h5></td>
+											<td>:</td>
+											<td><input name="description" type="text"
+												class="h5-input-xs"
+												ng-model="globalSelection.addressLabel.CUOR" name="CUOR"
+												title="Customers order number" maxlength="30"></td>
+										</tr>
+
+										<tr>
+											<td><h5>{{::languageConstants.get('Number of
+													labels')}}</h5></td>
+											<td>:</td>
+											<td><input name="labelsPerBox" type="number"
+												class="h5-input-xs"
+												ng-model="globalSelection.addressLabel.LBPB"
+												title="Labels per Box" min="1" max="100" step="1"
+												onkeypress="return event.charCode >= 48 && event.charCode <= 57"
+												style="text-align: right" required></td>
+										</tr>
+										<tr>
+											<td></td>
+											<td></td>
+											<td><h6 style="color: red;"
+													ng-show="addressForm.labelsPerBox.$invalid && !addressForm.labelsPerBox.$pristine"
+													class="help-block">{{::languageConstants.get(' Number
+													of labels must be between 1-100.')}}</h6></td>
+										</tr>
+									</table>
+								</td>
+							</tr>
+						</table>
+						<div class="row">
+							<div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+								<div class="pager h5-margin-auto">
+									<ul>
+										<li><button type="submit"
+												class="h5Button {{theme.button}}"
+												ng-disabled="addressForm.$invalid">{{::languageConstants.get('Print')}}</button></li>
+										<li><button type="button"
+												class="h5Button {{theme.button}}"
+												ng-click="AppCtrl.closeModalWindow()">{{::languageConstants.get('Cancel')}}</button>
+									</ul>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</form>
+</div>

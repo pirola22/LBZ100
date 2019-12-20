@@ -52,12 +52,7 @@ var h5;
                     Odin.Log.error("Error getting language constants " + errorResponse);
                     _this.scope.statusBar.push({ message: "Error getting language constants" + errorResponse, statusBarMessageType: h5.application.MessageType.Error, timestamp: new Date() });
                 });
-                if (this.$window.innerWidth < 768) {
-                    this.scope.showSideNavLabel = false;
-                }
-                else {
-                    this.scope.showSideNavLabel = false;
-                }
+                this.scope.showSideNavLabel = false;
             };
             AppController.prototype.initApplication = function () {
                 var _this = this;
@@ -65,6 +60,7 @@ var h5;
                 this.initAppScope();
                 this.initUIGrids();
                 this.initScopeFunctions();
+                console.log("-----------------initScopeFunctions ------ends----------");
                 this.$timeout(function () { _this.scope.appReady = true; }, 5000);
             };
             AppController.prototype.initGlobalConfig = function () {
@@ -126,11 +122,13 @@ var h5;
                     selection: { url: "views/Selection.html" },
                     MOLabelModule: { url: "views/MOLabelModule.html" },
                     InventoryLabelModule: { url: "views/InventoryLabelModule.html" },
+                    AddressLabelModule: { url: "views/AddressLabelModule.html" },
                     errorModule: { url: "views/Error.html" }
                 };
                 this.scope.modules = [
                     { moduleId: 1, activeIcon: 'SampleModule1.png', inactiveIcon: 'SampleModule1-na.png', heading: 'MO Label Module', content: this.scope.views.MOLabelModule.url, active: true, available: true },
-                    { moduleId: 2, activeIcon: 'SampleModule1.png', inactiveIcon: 'SampleModule1-na.png', heading: 'Inventory Label Module', content: this.scope.views.InventoryLabelModule.url, active: true, available: true }
+                    { moduleId: 2, activeIcon: 'SampleModule1.png', inactiveIcon: 'SampleModule1-na.png', heading: 'Inventory Label Module', content: this.scope.views.InventoryLabelModule.url, active: true, available: true },
+                    { moduleId: 3, activeIcon: 'SampleModule1.png', inactiveIcon: 'SampleModule1-na.png', heading: 'Address Label Module', content: this.scope.views.AddressLabelModule.url, active: true, available: true }
                 ];
                 this.scope.appConfig = {};
                 this.scope.userContext = new M3.UserContext();
@@ -138,6 +136,7 @@ var h5;
                 this.initGlobalSelection();
                 this.initMOLabelModule();
                 this.initInventoryLabelModule();
+                this.initAddressLabelModule();
             };
             AppController.prototype.initGlobalSelection = function () {
                 this.scope.globalSelection = {
@@ -151,6 +150,9 @@ var h5;
                         inventoryItemList: false,
                         inventoryItemLotList: false,
                         inventoryLabel: false,
+                        openDeliveryList: false,
+                        deliveryLineList: false,
+                        addressLabel: false,
                         item: false,
                         defaultPrinter: false
                     },
@@ -166,6 +168,10 @@ var h5;
                     inventoryItemLotList: {},
                     inventoryItem: {},
                     inventoryLabel: {},
+                    openDeliveryList: {},
+                    deliveryLineList: {},
+                    openDelivery: {},
+                    addressLabel: {},
                     item: {},
                     printerExists: false
                 };
@@ -231,18 +237,51 @@ var h5;
                     itemAltWeight: {}
                 };
             };
+            AppController.prototype.initAddressLabelModule = function () {
+                this.scope.addressLabelModule = {
+                    reload: true,
+                    transactionStatus: {
+                        warehouseList: false,
+                        AddressList: false,
+                        addressLabel: false
+                    },
+                    warehouseList: [],
+                    warehouse: {},
+                    deliveryNumber: {},
+                    itemNumber: {},
+                    orderNumber: {},
+                    orderLine: {},
+                    lineSfx: {},
+                    popn: {},
+                    cuor: {},
+                    openDeliveryList: [],
+                    openDeliveryListGrid: {},
+                    selectedOpenDeliveryListRow: {},
+                    selectedOpenDelivery: {},
+                    deliveryLineList: [],
+                    deliveryLineListGrid: {},
+                    selectedOpenDeliveryLotListRow: {},
+                    selectedOpenDeliveryLot: {},
+                    printAddressLabel: {},
+                };
+            };
             AppController.prototype.initApplicationConstants = function () {
             };
             AppController.prototype.initScopeFunctions = function () {
                 var _this = this;
+                console.log("-----------------initScopeFunctions----------------");
                 this.scope.MOLabelModule.displayMOLabel = function (fieldName, rowEntity) { _this.displayMOLabel(fieldName, rowEntity); };
                 this.scope.inventoryLabelModule.displayInventoryItemLot = function (fieldName, rowEntity) { _this.displayInventoryItemLot(fieldName, rowEntity); };
                 this.scope.inventoryLabelModule.displayInventoryItemLabel = function (fieldName, rowEntity) { _this.displayInventoryItemLabel(fieldName, rowEntity); };
+                this.scope.addressLabelModule.displayOpenDeliveryLabel = function (fieldName, rowEntity) { _this.displayOpenDeliveryLabel(fieldName, rowEntity); };
+                this.scope.addressLabelModule.displayOpenDeliveryLine = function (fieldName, rowEntity) { _this.displayOpenDeliveryLine(fieldName, rowEntity); };
             };
             AppController.prototype.initUIGrids = function () {
                 this.scope.MOLabelModule.MOListGrid = this.gridService.getMOListGrid();
                 this.scope.inventoryLabelModule.inventoryItemListGrid = this.gridService.getInventoryItemListGrid();
                 this.scope.inventoryLabelModule.inventoryItemLotListGrid = this.gridService.getInventoryItemLotListGrid();
+                this.scope.addressLabelModule.openDeliveryListGrid = this.gridService.getOpenDeliveryListGrid();
+                this.scope.addressLabelModule.deliveryLineListGrid = this.gridService.getDeliveryLineListGrid();
                 this.initUIGridsOnRegisterApi();
             };
             AppController.prototype.initUIGridsOnRegisterApi = function () {
@@ -310,6 +349,48 @@ var h5;
                         _this.gridService.saveGridState("inventoryItemLotListGrid", gridApi);
                     });
                 };
+                this.scope.addressLabelModule.openDeliveryListGrid.onRegisterApi = function (gridApi) {
+                    _this.gridService.adjustOpenDeliveryGridHeight("openDeliveryListGrid", _this.scope.addressLabelModule.openDeliveryListGrid.data.length, 500);
+                    gridApi.core.on.renderingComplete(_this.scope, function (handler) { _this.gridService.restoreGridState("openDeliveryListGrid", gridApi); });
+                    gridApi.core.on.sortChanged(_this.scope, function (handler) { _this.gridService.saveGridState("openDeliveryListGrid", gridApi); });
+                    gridApi.core.on.columnVisibilityChanged(_this.scope, function (handler) { _this.gridService.saveGridState("openDeliveryListGrid", gridApi); });
+                    gridApi.core.on.filterChanged(_this.scope, function (handler) { _this.gridService.saveGridState("openDeliveryListGrid", gridApi); });
+                    gridApi.colMovable.on.columnPositionChanged(_this.scope, function (handler) { _this.gridService.saveGridState("openDeliveryListGrid", gridApi); });
+                    gridApi.colResizable.on.columnSizeChanged(_this.scope, function (handler) { _this.gridService.saveGridState("openDeliveryListGrid", gridApi); });
+                    gridApi.cellNav.on.viewPortKeyDown(_this.scope, function (event) {
+                        if ((event.keyCode === 67) && (event.ctrlKey || event.metaKey)) {
+                            var cells = gridApi.cellNav.getCurrentSelection();
+                            _this.copyCellContentToClipBoard(cells);
+                        }
+                    });
+                    gridApi.selection.on.rowSelectionChanged(_this.scope, function (row) {
+                        _this.gridService.saveGridState("openDeliveryListGrid", gridApi);
+                    });
+                    gridApi.selection.on.rowSelectionChangedBatch(_this.scope, function (row) {
+                        _this.gridService.saveGridState("openDeliveryListGrid", gridApi);
+                    });
+                };
+                this.scope.addressLabelModule.deliveryLineListGrid.onRegisterApi = function (gridApi) {
+                    _this.gridService.adjustOpenDeliveryGridHeight("deliveryLineListGrid", _this.scope.addressLabelModule.deliveryLineListGrid.data.length, 500);
+                    gridApi.core.on.renderingComplete(_this.scope, function (handler) { _this.gridService.restoreGridState("deliveryLineListGrid", gridApi); });
+                    gridApi.core.on.sortChanged(_this.scope, function (handler) { _this.gridService.saveGridState("deliveryLineListGrid", gridApi); });
+                    gridApi.core.on.columnVisibilityChanged(_this.scope, function (handler) { _this.gridService.saveGridState("deliveryLineListGrid", gridApi); });
+                    gridApi.core.on.filterChanged(_this.scope, function (handler) { _this.gridService.saveGridState("deliveryLineListGrid", gridApi); });
+                    gridApi.colMovable.on.columnPositionChanged(_this.scope, function (handler) { _this.gridService.saveGridState("deliveryLineListGrid", gridApi); });
+                    gridApi.colResizable.on.columnSizeChanged(_this.scope, function (handler) { _this.gridService.saveGridState("deliveryLineListGrid", gridApi); });
+                    gridApi.cellNav.on.viewPortKeyDown(_this.scope, function (event) {
+                        if ((event.keyCode === 67) && (event.ctrlKey || event.metaKey)) {
+                            var cells = gridApi.cellNav.getCurrentSelection();
+                            _this.copyCellContentToClipBoard(cells);
+                        }
+                    });
+                    gridApi.selection.on.rowSelectionChanged(_this.scope, function (row) {
+                        _this.gridService.saveGridState("deliveryLineListGrid", gridApi);
+                    });
+                    gridApi.selection.on.rowSelectionChangedBatch(_this.scope, function (row) {
+                        _this.gridService.saveGridState("deliveryLineListGrid", gridApi);
+                    });
+                };
             };
             AppController.prototype.resetUIGridsColumnDefs = function () {
             };
@@ -340,6 +421,7 @@ var h5;
             };
             AppController.prototype.initModule = function () {
                 var _this = this;
+                console.log("initModule------- ->>>>>>>>>>>>>  ");
                 var moduleId = this.storageService.getLocalData('h5.app.appName.module.selected');
                 moduleId = angular.isNumber(moduleId) ? moduleId : 1;
                 this.scope.activeModule = moduleId;
@@ -472,6 +554,17 @@ var h5;
                     animation: true,
                     templateUrl: "views/InventoryLabelModal.html",
                     size: "lg",
+                    scope: this.scope,
+                    backdrop: "static"
+                };
+                this.scope.modalWindow = this.$uibModal.open(options);
+            };
+            AppController.prototype.openAddressLabelModal = function () {
+                console.log("openAddressLabelModal");
+                var options = {
+                    animation: true,
+                    templateUrl: "views/AddressLabelModal.html",
+                    size: "md",
                     scope: this.scope,
                     backdrop: "static"
                 };
@@ -634,13 +727,14 @@ var h5;
             AppController.prototype.loadDefaultFields = function () {
                 var userContext = this.scope.userContext;
                 var appConfig = this.scope.appConfig;
-                console.log(" loadDefaultFields this.scope.globalSelection.defaultPrinter >>>>>>>>>>>>>user " + this.scope.globalSelection.defaultPrinter);
                 var facility = angular.isString(appConfig.searchQuery.faci) ? appConfig.searchQuery.faci : userContext.FACI;
                 this.scope.MOLabelModule.facility = { selected: facility };
                 this.loadFacilityList(userContext.company, userContext.division);
                 var warehouse = angular.isString(appConfig.searchQuery.whlo) ? appConfig.searchQuery.whlo : userContext.WHLO;
                 this.scope.inventoryLabelModule.warehouse = { selected: warehouse };
                 this.loadWarehouseList(userContext.company);
+                this.scope.addressLabelModule.warehouse = { selected: warehouse };
+                this.scope.globalSelection.addressLabel.warehouse = { selected: warehouse };
             };
             AppController.prototype.loadApplicationData = function () {
                 console.log("loadApplicationData------- ->>>>>>>>>>>>>  ");
@@ -700,6 +794,7 @@ var h5;
                         this.loadInventoryLabelModule(this.scope.inventoryLabelModule.reload);
                         break;
                     case 3:
+                        this.loadAddressLabelModule(this.scope.addressLabelModule.reload);
                         break;
                     case 4:
                         break;
@@ -887,6 +982,62 @@ var h5;
                     _this.scope.statusBar.push({ message: error + " " + err.errorMessage, statusBarMessageType: h5.application.MessageType.Error, timestamp: new Date() });
                 });
             };
+            AppController.prototype.loadOpenDeliveryLotList = function (deliveryNumber) {
+                var _this = this;
+                console.log("loadOpenDeliveryLotList------------------------------------->>>>>>>>>>>>>>");
+                this.scope.loadingData = true;
+                var trqt = "";
+                this.scope.globalSelection.deliveryLineList = true;
+                var count = 0;
+                this.scope.userContext.dateFormat;
+                this.appService.getDeliveryLineList(deliveryNumber).then(function (val) {
+                    _this.scope.globalSelection.deliveryLineList = val.items;
+                    _this.scope.addressLabelModule.orderLine = val.item.RIDL;
+                    val.items.forEach(function (value) {
+                        trqt = value.URTRQT;
+                        val.items[count].URTRQT = trqt.substring(0, (trqt.length - 4));
+                        count++;
+                    });
+                    _this.scope.addressLabelModule.deliveryLineListGrid.data = val.items;
+                    _this.gridService.adjustOpenDeliveryGridHeight("deliveryLineListGrid", val.items.length, 500);
+                    _this.scope.globalSelection.transactionStatus.deliveryLineList = false;
+                    _this.refreshTransactionStatus();
+                }, function (err) {
+                    _this.scope.globalSelection.transactionStatus.deliveryLineList = false;
+                    _this.refreshTransactionStatus();
+                    var error = "API: " + err.program + "." + err.transaction + ", Input: " + JSON.stringify(err.requestData) + ", Error Code: " + err.errorCode;
+                    _this.showError(error, [err.errorMessage]);
+                    _this.scope.statusBar.push({ message: error + " " + err.errorMessage, statusBarMessageType: h5.application.MessageType.Error, timestamp: new Date() });
+                });
+            };
+            AppController.prototype.loadOpenDeliveryList = function (warehouse) {
+                var _this = this;
+                console.log("____________________loadOpenDeliveryList______________________");
+                var count = 0;
+                this.scope.loadingData = true;
+                this.scope.globalSelection.openDeliveryList = true;
+                this.appService.getOpenDeliveryList(warehouse).then(function (val) {
+                    _this.scope.globalSelection.openDeliveryList = val.items;
+                    console.log(val);
+                    val.items.forEach(function (value) {
+                        val.items[count].OQDSDT = _this.formatDatePerUserSetting(value.OQDSDT);
+                        if (value.OKCUNM === "") {
+                            val.items[count].OKCUNM = value.OACONM;
+                        }
+                        count++;
+                    });
+                    _this.scope.addressLabelModule.openDeliveryListGrid.data = val.items;
+                    _this.gridService.adjustOpenDeliveryGridHeight("openDeliveryListGrid", val.items.length, 500);
+                    _this.scope.globalSelection.transactionStatus.openDeliveryList = false;
+                    _this.refreshTransactionStatus();
+                }, function (err) {
+                    _this.scope.globalSelection.transactionStatus.openDeliveryList = false;
+                    _this.refreshTransactionStatus();
+                    var error = "API: " + err.program + "." + err.transaction + ", Input: " + JSON.stringify(err.requestData) + ", Error Code: " + err.errorCode;
+                    _this.showError(error, [err.errorMessage]);
+                    _this.scope.statusBar.push({ message: error + " " + err.errorMessage, statusBarMessageType: h5.application.MessageType.Error, timestamp: new Date() });
+                });
+            };
             AppController.prototype.loadItem = function (itemNumber) {
                 var _this = this;
                 this.scope.loadingData = true;
@@ -920,7 +1071,85 @@ var h5;
                 this.loadInventoryLabel(item.MLWHLO, itemLot.ITNO, item.MMITDS, itemLot.BANO, itemLot.REDA, itemLot.RORN, itemLot.BREF, itemLot.BRE2, item.MMUNMS, item.MLSTQT);
                 this.openInventoryLabelModal();
             };
+            AppController.prototype.formatDatePerUserSetting = function (date) {
+                var dateFmnt = this.scope.userContext.dateFormat;
+                var formattedDatedformattedDated = "";
+                var formattedDated = "";
+                var yy = date.substring(0, 4);
+                var MM = date.substring(4, 6);
+                var dd = date.substring(6);
+                switch (dateFmnt) {
+                    case "MMddyy": {
+                        formattedDated = MM + "/" + dd + "/" + yy;
+                        break;
+                    }
+                    case "yyMMdd": {
+                        formattedDated = yy + "/" + MM + "/" + dd;
+                        break;
+                    }
+                    case "ddMMyy": {
+                        formattedDated = dd + "/" + MM + "/" + yy;
+                        break;
+                    }
+                    default: {
+                        formattedDated = dd + "/" + MM + "/" + yy;
+                        break;
+                    }
+                }
+                return formattedDated;
+            };
+            AppController.prototype.displayOpenDeliveryLabel = function (fieldName, selectedRow) {
+                console.log("-----------------displayOpenDeliveryLabel----------------");
+                this.scope.addressLabelModule.deliveryNumber = selectedRow.OQDLIX;
+                this.scope.addressLabelModule.orderNumber = selectedRow.OQRIDN;
+                this.scope.addressLabelModule.selectedOpenDeliveryLotListRow = selectedRow;
+                this.loadOpenDeliveryLotList(this.scope.addressLabelModule.deliveryNumber);
+            };
+            AppController.prototype.displayOpenDeliveryLine = function (fieldName, selectedRow) {
+                console.log("-----------------displayOpenDeliveryLine----------------");
+                this.scope.addressLabelModule.itemNumber = selectedRow.URITNO;
+                this.scope.addressLabelModule.selectedOpenDeliveryLotListRow = selectedRow;
+                this.loadAddressLabel(selectedRow.URDLIX, selectedRow.URITNO);
+                this.scope.addressLabelModule.lineSfx = selectedRow.URRIDX;
+                this.scope.addressLabelModule.orderLine = selectedRow.URRIDL;
+                this.loadLine(selectedRow.URRIDN, selectedRow.URRIDL);
+                this.openAddressLabelModal();
+            };
+            AppController.prototype.loadLine = function (orderNumber, orderLine) {
+                var _this = this;
+                this.scope.globalSelection.addressLabel.RIDN = orderNumber;
+                this.scope.globalSelection.addressLabel.orderNumber = orderNumber;
+                console.log("loadLine----------------");
+                this.scope.loadingData = true;
+                this.scope.globalSelection.transactionStatus.item = true;
+                var orderNum = this.scope.globalSelection.addressLabel.RIDN;
+                var itemNumber = this.scope.globalSelection.addressLabel.ITNO;
+                var deliveryNumber = this.scope.globalSelection.addressLabel.DLIX;
+                this.appService.getLine(orderNumber, orderLine).then(function (val) {
+                    _this.scope.addressLabelModule.popn = val.item.POPN;
+                    _this.scope.addressLabelModule.cuor = val.item.CUOR;
+                    _this.scope.globalSelection.item = val.items;
+                    _this.scope.globalSelection.addressLabel = {
+                        DLIX: deliveryNumber,
+                        ITNO: itemNumber,
+                        CUOR: _this.scope.addressLabelModule.cuor,
+                        POPN: _this.scope.addressLabelModule.popn,
+                        LBPB: 1,
+                    };
+                    _this.scope.globalSelection.transactionStatus.item = false;
+                    _this.refreshTransactionStatus();
+                }, function (err) {
+                    _this.scope.globalSelection.addressLabel = {
+                        DLIX: deliveryNumber,
+                        ITNO: itemNumber,
+                        LBPB: 1
+                    };
+                    _this.scope.globalSelection.transactionStatus.item = false;
+                    _this.refreshTransactionStatus();
+                });
+            };
             AppController.prototype.displayInventoryItemLot = function (fieldName, selectedRow) {
+                console.log("-----------------displayInventoryItemLot----------------");
                 this.scope.inventoryLabelModule.selectedInventoryItemListRow = selectedRow;
                 this.scope.inventoryLabelModule.itemNumber = selectedRow.MLITNO;
                 this.scope.inventoryLabelModule.location = selectedRow.MLWHSL;
@@ -932,6 +1161,7 @@ var h5;
                 this.scope.inventoryLabelModule.transactionStatus.warehouseList = true;
                 this.appService.getWarehouseList(company).then(function (val) {
                     _this.scope.inventoryLabelModule.warehouseList = val.items;
+                    _this.scope.addressLabelModule.warehouseList = val.items;
                     _this.scope.inventoryLabelModule.transactionStatus.warehouseList = false;
                     _this.refreshTransactionStatus();
                 }, function (err) {
@@ -1032,6 +1262,13 @@ var h5;
                     BXNO: 1,
                     LBPB: 1,
                     MULT: false
+                };
+            };
+            AppController.prototype.loadAddressLabel = function (deliveryNumber, itemNumber) {
+                console.log("loadAddressLabel");
+                this.scope.globalSelection.addressLabel = {
+                    DLIX: deliveryNumber,
+                    ITNO: itemNumber,
                 };
             };
             AppController.prototype.chgInventoryLabelAlpha = function (warehouse, itemNumber, location, receiptDate, lotNumber, referenceOrder, lotRef1, lotRef2, onHandBalance, labelType, userID, printer, labelsPerBox) {
@@ -1411,6 +1648,18 @@ var h5;
                 }
                 this.scope.inventoryLabelModule.reload = false;
             };
+            AppController.prototype.loadAddressLabelModule = function (reLoad) {
+                var userContext = this.scope.userContext;
+                this.scope.addressLabelModule.deliveryNumber = "";
+                if (reLoad) {
+                    this.clearData(["addressLabelModule"]);
+                    var selectedWarehouse = this.scope.addressLabelModule.warehouse;
+                    if (selectedWarehouse.selected) {
+                        this.loadOpenDeliveryList(selectedWarehouse.selected);
+                    }
+                }
+                this.scope.inventoryLabelModule.reload = false;
+            };
             AppController.prototype.submitMOForm = function (isValid) {
                 if (isValid) {
                     this.onMOPrint();
@@ -1426,6 +1675,98 @@ var h5;
                 else {
                     console.log("not printed");
                 }
+            };
+            AppController.prototype.submitAddressForm = function (isValid) {
+                if (isValid) {
+                    console.log("submitAddressForm");
+                    this.onAddressPrint();
+                }
+                else {
+                    console.log("not printed");
+                }
+            };
+            AppController.prototype.onAddressPrint = function () {
+                console.log("onAddressPrint");
+                var userContext = this.scope.userContext;
+                var warehouse = this.scope.addressLabelModule.warehouse.selected;
+                var itemNumber = this.scope.globalSelection.addressLabel.ITNO;
+                var ridn = this.scope.addressLabelModule.orderNumber;
+                var ridl = this.scope.addressLabelModule.orderLine;
+                var dlix = this.scope.globalSelection.addressLabel.DLIX;
+                var ridx = this.scope.addressLabelModule.lineSfx;
+                var labelsPerBox = this.scope.globalSelection.addressLabel.LBPB;
+                var userID = this.scope.userContext.m3User;
+                var printer = this.scope.globalSelection.printer.selected.DEV;
+                this.saveAddressLabelXML(warehouse, ridn, ridl, dlix, ridx, userID, printer, labelsPerBox);
+                this.closeModalWindow();
+            };
+            AppController.prototype.saveAddressLabelXML = function (warehouse, ridn, ridl, dlix, ridx, userID, printer, labelsPerBox) {
+                var _this = this;
+                console.log("------------------------saveAddressLabelXML---------------------- " + dlix);
+                this.scope.loadingData = true;
+                this.scope.globalSelection.transactionStatus.addressLabel = true;
+                var fname = "";
+                var fcua1 = "";
+                var fcua2 = "";
+                var fcua3 = "";
+                var tname = "";
+                var tcua1 = "";
+                var tcua2 = "";
+                var tcua3 = "";
+                var itemNumber = this.scope.addressLabelModule.itemNumber;
+                this.appService.getAddress(dlix).then(function (val) {
+                    tname = val.item.NAME.substring(0, 30);
+                    tcua1 = val.item.ADR1.substring(0, 30);
+                    tcua2 = val.item.ADR2.substring(0, 30);
+                    tcua3 = val.item.ADR3.substring(0, 30);
+                    var popn = _this.scope.globalSelection.addressLabel.POPN;
+                    var cuor = _this.scope.globalSelection.addressLabel.CUOR;
+                    _this.appService.addAddressXMLRecord(warehouse, ridn, ridl, dlix, ridx, userID, tname, tcua1, tcua2, tcua3, popn, cuor).then(function (val) {
+                        for (var y = 1; y <= labelsPerBox; y++) {
+                            _this.callAddressLabelPrint(itemNumber, printer, ridn, ridl, dlix, ridx, labelsPerBox);
+                        }
+                    }, function (err) {
+                        _this.appService.chgAddressXMLRecord(warehouse, ridn, ridl, dlix, ridx, userID, tname, tcua1, tcua2, tcua3, popn, cuor).then(function (val) {
+                            console.log("XML record SAVED  ");
+                            for (var y = 1; y <= labelsPerBox; y++) {
+                                _this.callAddressLabelPrint(itemNumber, printer, ridn, ridl, dlix, ridx, labelsPerBox);
+                            }
+                        }, function (err) {
+                            console.log("Failed to add and save XMLPRT");
+                            var error = "API: " + err.program + "." + err.transaction + ", Input: " + JSON.stringify(err.requestData) + ", Error Code: " + err.errorCode;
+                            _this.showError(error, [err.errorMessage]);
+                            _this.scope.statusBar.push({ message: error + " " + err.errorMessage, statusBarMessageType: h5.application.MessageType.Error, timestamp: new Date() });
+                        });
+                    }).finally(function () {
+                        _this.refreshTransactionStatus();
+                    });
+                    _this.scope.globalSelection.transactionStatus.addressLabel = false;
+                    _this.loadMOList(warehouse);
+                }, function (err) {
+                    _this.scope.globalSelection.transactionStatus.addressLabel = false;
+                    var error = "API: " + err.program + "." + err.transaction + ", Input: " + JSON.stringify(err.requestData) + ", Error Code: " + err.errorCode;
+                    _this.showError(error, [err.errorMessage]);
+                    _this.scope.statusBar.push({ message: error + " " + err.errorMessage, statusBarMessageType: h5.application.MessageType.Error, timestamp: new Date() });
+                }).finally(function () {
+                    _this.refreshTransactionStatus();
+                });
+            };
+            AppController.prototype.callAddressLabelPrint = function (itemNumber, printer, labelType, warehouse, location, lotNumber, labelsPerBox) {
+                var _this = this;
+                console.log("callAddressLabelPrint");
+                this.scope.loadingData = true;
+                this.scope.globalSelection.transactionStatus.addressLabel = true;
+                this.appService.printAddressLabel(itemNumber, printer, labelType, warehouse, location, lotNumber, labelsPerBox).then(function (val) {
+                    _this.showInfo("Address Label Successfully Printed", ["Address Label Printed"]);
+                    _this.scope.globalSelection.transactionStatus.addressLabel = false;
+                }, function (err) {
+                    _this.scope.globalSelection.transactionStatus.addressLabel = false;
+                    var error = "API: " + err.program + "." + err.transaction + ", Input: " + JSON.stringify(err.requestData) + ", Error Code: " + err.errorCode;
+                    _this.showError(error, [err.errorMessage]);
+                    _this.scope.statusBar.push({ message: error + " " + err.errorMessage, statusBarMessageType: h5.application.MessageType.Error, timestamp: new Date() });
+                }).finally(function () {
+                    _this.refreshTransactionStatus();
+                });
             };
             AppController.prototype.onInventoryPrint = function () {
                 var userContext = this.scope.userContext;

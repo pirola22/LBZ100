@@ -108,6 +108,26 @@ var h5;
                 };
                 return this.restService.executeM3MIRestService("CMS100MI", "LstInvLabelsTX", requestData, 0).then(function (val) { return val; });
             };
+            AppService.prototype.getOpenDeliveryList = function (warehouse) {
+                var requestData = {
+                    OQINOU: "1",
+                    OQWHLO: warehouse
+                };
+                return this.restService.executeM3MIRestService("CMS100MI", "LstOpenDelivery", requestData, 0).then(function (val) { return val; });
+            };
+            AppService.prototype.getAddress = function (deliveryNumber) {
+                var requestData = {
+                    DLIX: deliveryNumber,
+                    ADRT: "02"
+                };
+                return this.restService.executeM3MIRestService("MWS410MI", "GetAdr", requestData, 0).then(function (val) { return val; });
+            };
+            AppService.prototype.getDeliveryLineList = function (deliveryNumber) {
+                var requestData = {
+                    URDLIX: deliveryNumber
+                };
+                return this.restService.executeM3MIRestService("CMS100MI", "LstDeliveryLine", requestData, 0).then(function (val) { return val; });
+            };
             AppService.prototype.getInventoryItemLotList = function (itemNumber) {
                 var requestData = {
                     ITNO: itemNumber
@@ -119,6 +139,13 @@ var h5;
                     ITNO: itemNumber
                 };
                 return this.restService.executeM3MIRestService("MMS001MI", "Get", requestData).then(function (val) { return val; });
+            };
+            AppService.prototype.getLine = function (orderNumber, orderLine) {
+                var requestData = {
+                    ORNO: orderNumber,
+                    PONR: orderLine
+                };
+                return this.restService.executeM3MIRestService("OIS100MI", "GetLine", requestData).then(function (val) { return val; });
             };
             AppService.prototype.addXMLRecord = function (USD1, USD2, USD3, USD4, USD5, ITNO, USID) {
                 var requestData = {
@@ -132,6 +159,52 @@ var h5;
                     PK07: USID
                 };
                 return this.restService.executeM3MIRestService("CUSEXTMI", "AddFieldValue", requestData).then(function (val) { return val; });
+            };
+            AppService.prototype.addAddressXMLRecord = function (USD1, USD2, USD3, USD4, USD5, USID, tname, tcua1, tcua2, tcua3, popn, cuor) {
+                var requestData = {
+                    FILE: "XMLPRT",
+                    PK01: "T03",
+                    PK02: "T03",
+                    PK03: USD2,
+                    PK04: USD3,
+                    PK05: USD4,
+                    PK06: USD5,
+                    PK07: USID,
+                    A030: "",
+                    A130: "",
+                    A230: "",
+                    A330: "",
+                    A430: tname,
+                    A530: tcua1,
+                    A630: tcua2,
+                    A730: tcua3,
+                    A830: popn,
+                    A930: cuor
+                };
+                return this.restService.executeM3MIRestService("CUSEXTMI", "AddFieldValue", requestData).then(function (val) { return val; });
+            };
+            AppService.prototype.chgAddressXMLRecord = function (USD1, USD2, USD3, USD4, USD5, USID, tname, tcua1, tcua2, tcua3, popn, cuor) {
+                var requestData = {
+                    FILE: "XMLPRT",
+                    PK01: "T03",
+                    PK02: "T03",
+                    PK03: USD2,
+                    PK04: USD3,
+                    PK05: USD4,
+                    PK06: USD5,
+                    PK07: USID,
+                    A030: "",
+                    A130: "",
+                    A230: "",
+                    A330: "",
+                    A430: tname,
+                    A530: tcua1,
+                    A630: tcua2,
+                    A730: tcua3,
+                    A830: popn,
+                    A930: cuor
+                };
+                return this.restService.executeM3MIRestService("CUSEXTMI", "ChgFieldValue", requestData).then(function (val) { return val; });
             };
             AppService.prototype.chgXMLRecord = function (USD1, USD2, USD3, USD4, USD5, ITNO, USID) {
                 var requestData = {
@@ -155,6 +228,19 @@ var h5;
                     USD3: location,
                     USD4: lotNumber,
                     COPY: labelsPerBox
+                };
+                return this.restService.executeM3MIRestService("MMS200MI", "PrtItemLabel", requestData, 0).then(function (val) { return val; });
+            };
+            AppService.prototype.printAddressLabel = function (itemNumber, printer, ridn, ridl, dlix, ridx, labelsPerBox) {
+                var requestData = {
+                    ITNO: itemNumber,
+                    DEV0: printer,
+                    COPY: labelsPerBox,
+                    USD1: "T03",
+                    USD2: ridn,
+                    USD3: ridl,
+                    USD4: dlix,
+                    USD5: ridx
                 };
                 return this.restService.executeM3MIRestService("MMS200MI", "PrtItemLabel", requestData, 0).then(function (val) { return val; });
             };

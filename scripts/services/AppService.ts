@@ -9,9 +9,14 @@ module h5.application {
         lstPrinters(): ng.IPromise<M3.IMIResponse>;
         getMOList(facility: string): ng.IPromise<M3.IMIResponse>;
         getInventoryItemList(warehouse: string): ng.IPromise<M3.IMIResponse>;
+        getOpenDeliveryList(warehouse: string): ng.IPromise<M3.IMIResponse>;
         getInventoryItemLotList(itemNumber: string): ng.IPromise<M3.IMIResponse>;
         getItem(itemNumber: string): ng.IPromise<M3.IMIResponse>;
+        getLine(orderNumber: string, orderLine: string): ng.IPromise<M3.IMIResponse>;
+        getAddress(deliveryNumber: string): ng.IPromise<M3.IMIResponse>;
         addXMLRecord(USD1: string, USD2: string, USD3: string, USD4: string, USD5: string, ITNO: string, USID: string): ng.IPromise<M3.IMIResponse>;
+        addAddressXMLRecord(USD1: string, USD2: string, USD3: string, USD4: string, USD5: string, USID: string, tname: string, tcua1: string, tcua2: string, tcua3: string, popn: string, cuor: string): ng.IPromise<M3.IMIResponse>;
+        chgAddressXMLRecord(USD1: string, USD2: string, USD3: string, USD4: string, USD5: string, USID: string, tname: string, tcua1: string, tcua2: string, tcua3: string, popn: string, cuor: string): ng.IPromise<M3.IMIResponse>;
         chgXMLRecord(USD1: string, USD2: string, USD3: string, USD4: string, USD5: string, ITNO: string, USID: string): ng.IPromise<M3.IMIResponse>;
         printMOLabel(itemNumber: string, printer: string, labelType: string, facility: string, moNumber: string, boxNumber: string, labelsPerBox: string): ng.IPromise<M3.IMIResponse>;
         printInventoryLabel(itemNumber: string, printer: string, labelType: string, warehouse: string, location: string, lotNumber: string, labelsPerBox: string): ng.IPromise<M3.IMIResponse>;
@@ -33,6 +38,8 @@ module h5.application {
         getLabelTypeListAlpha(): ng.IPromise<M3.IMIResponse>;
         addPrintFile(user: string, printer: string): ng.IPromise<M3.IMIResponse>;
         updPrintFile(user: string, printer: string): ng.IPromise<M3.IMIResponse>;
+        getDeliveryLineList(deliveryNumber: string): ng.IPromise<M3.IMIResponse>;
+        printAddressLabel(itemNumber: string, printer: string, ridn: string, ridl: string, dlix: string, ridx: string, labelsPerBox: string): ng.IPromise<M3.IMIResponse>;
     }
 
     export class AppService implements IAppService {
@@ -124,13 +131,13 @@ module h5.application {
             };
             return this.restService.executeM3MIRestService("MNS205MI", "Add", requestData).then((val: M3.IMIResponse) => { return val; });
         }
-                public updPrintFile(user: string, printer: string): ng.IPromise<M3.IMIResponse> {
+        public updPrintFile(user: string, printer: string): ng.IPromise<M3.IMIResponse> {
             let requestData = {
                 PRTF: "MMS501PF",
                 USID: user,
-                MEDC:"*PRT",
+                MEDC: "*PRT",
                 SEQN: "1",
-                
+
                 DEV1: printer
             };
             return this.restService.executeM3MIRestService("MNS205MI", "Upd", requestData).then((val: M3.IMIResponse) => { return val; });
@@ -158,7 +165,29 @@ module h5.application {
             }
             return this.restService.executeM3MIRestService("CMS100MI", "LstInvLabelsTX", requestData, 0).then((val: M3.IMIResponse) => { return val; });
         }
+        public getOpenDeliveryList(warehouse: string): ng.IPromise<M3.IMIResponse> {
 
+            let requestData = {
+                OQINOU: "1",
+                OQWHLO: warehouse
+            }
+            return this.restService.executeM3MIRestService("CMS100MI", "LstOpenDelivery", requestData, 0).then((val: M3.IMIResponse) => { return val; });
+        }
+        public getAddress(deliveryNumber: string): ng.IPromise<M3.IMIResponse> {
+
+            let requestData = {
+                DLIX: deliveryNumber,
+                ADRT: "02"
+            }
+            return this.restService.executeM3MIRestService("MWS410MI", "GetAdr", requestData, 0).then((val: M3.IMIResponse) => { return val; });
+        }
+        public getDeliveryLineList(deliveryNumber: string): ng.IPromise<M3.IMIResponse> {
+            let requestData = {
+                URDLIX: deliveryNumber
+
+            }
+            return this.restService.executeM3MIRestService("CMS100MI", "LstDeliveryLine", requestData, 0).then((val: M3.IMIResponse) => { return val; });
+        }
         public getInventoryItemLotList(itemNumber: string): ng.IPromise<M3.IMIResponse> {
             let requestData = {
                 ITNO: itemNumber
@@ -173,7 +202,13 @@ module h5.application {
             }
             return this.restService.executeM3MIRestService("MMS001MI", "Get", requestData).then((val: M3.IMIResponse) => { return val; });
         }
-
+        public getLine(orderNumber: string, orderLine: string): ng.IPromise<M3.IMIResponse> {
+            let requestData = {
+                ORNO: orderNumber,
+                PONR: orderLine
+            }
+            return this.restService.executeM3MIRestService("OIS100MI", "GetLine", requestData).then((val: M3.IMIResponse) => { return val; });
+        }
         addXMLRecord(USD1: string, USD2: string, USD3: string, USD4: string, USD5: string, ITNO: string, USID: string): ng.IPromise<M3.IMIResponse> {
 
             let requestData = {
@@ -190,7 +225,60 @@ module h5.application {
             return this.restService.executeM3MIRestService("CUSEXTMI", "AddFieldValue", requestData).then((val: M3.IMIResponse) => { return val; });
 
         }
+        addAddressXMLRecord(USD1: string, USD2: string, USD3: string, USD4: string, USD5: string, USID: string, tname: string, tcua1: string, tcua2: string, tcua3: string, popn: string, cuor: string ): ng.IPromise<M3.IMIResponse> {
 
+            let requestData = {
+                   FILE: "XMLPRT",
+                PK01: "T03",
+                PK02: "T03",
+                PK03: USD2,
+                PK04: USD3,
+                PK05: USD4,
+                PK06: USD5,
+                PK07: USID,
+                //FIELDS
+                A030: "",
+                A130: "",
+                A230: "",
+                A330: "",
+                A430: tname,
+                A530: tcua1,
+                A630: tcua2,
+                A730: tcua3,
+                A830: popn,
+                A930: cuor
+
+            }
+            return this.restService.executeM3MIRestService("CUSEXTMI", "AddFieldValue", requestData).then((val: M3.IMIResponse) => { return val; });
+
+        }
+        chgAddressXMLRecord(USD1: string, USD2: string, USD3: string, USD4: string, USD5: string, USID: string, tname: string, tcua1: string, tcua2: string, tcua3: string, popn: string,cuor: string): ng.IPromise<M3.IMIResponse> {
+
+            let requestData = {
+                  FILE: "XMLPRT",
+                PK01: "T03",
+                PK02: "T03",
+                PK03: USD2,
+                PK04: USD3,
+                PK05: USD4,
+                PK06: USD5,
+                PK07: USID,
+                //FIELDS
+                A030: "",
+                A130: "",
+                A230: "",
+                A330: "",
+                A430: tname,
+                A530: tcua1,
+                A630: tcua2,
+                A730: tcua3,
+                A830: popn,
+                A930: cuor
+
+            }
+            return this.restService.executeM3MIRestService("CUSEXTMI", "ChgFieldValue", requestData).then((val: M3.IMIResponse) => { return val; });
+
+        }
         chgXMLRecord(USD1: string, USD2: string, USD3: string, USD4: string, USD5: string, ITNO: string, USID: string): ng.IPromise<M3.IMIResponse> {
 
             let requestData = {
@@ -220,7 +308,19 @@ module h5.application {
             }
             return this.restService.executeM3MIRestService("MMS200MI", "PrtItemLabel", requestData, 0).then((val: M3.IMIResponse) => { return val; });
         }
-
+        public printAddressLabel(itemNumber: string, printer: string, ridn: string, ridl: string, dlix: string, ridx: string, labelsPerBox: string): ng.IPromise<M3.IMIResponse> {
+            let requestData = {
+                ITNO: itemNumber,
+                DEV0: printer,
+                COPY: labelsPerBox,
+                USD1: "T03",
+                USD2: ridn,
+                USD3: ridl,
+                USD4: dlix,
+                USD5: ridx
+            }
+            return this.restService.executeM3MIRestService("MMS200MI", "PrtItemLabel", requestData, 0).then((val: M3.IMIResponse) => { return val; });
+        }
         public printMOLabel(itemNumber: string, printer: string, labelType: string, facility: string, moNumber: string, boxNumber: string, labelsPerBox: string): ng.IPromise<M3.IMIResponse> {
             let requestData = {
                 ITNO: itemNumber,

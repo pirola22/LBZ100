@@ -80,6 +80,13 @@ var h5;
                     angular.element(document.getElementById(gridId)).css('height', newHeight + 'px');
                 }, timeDelay);
             };
+            GridService.prototype.adjustOpenDeliveryGridHeight = function (gridId, noOfRows, timeDelay) {
+                noOfRows = (noOfRows < 1 ? 1 : noOfRows);
+                this.$timeout(function () {
+                    var newHeight = noOfRows > 15 ? 300 : (150 + noOfRows * 30);
+                    angular.element(document.getElementById(gridId)).css('height', newHeight + 'px');
+                }, timeDelay);
+            };
             GridService.prototype.saveGridState = function (gridId, gridApi) {
                 var gridState = gridApi.saveState.save();
                 this.storageService.setLocalData('h5.app.appName.gridState.' + gridId, gridState);
@@ -137,6 +144,33 @@ var h5;
                     { name: "RORN", displayName: this.languageService.languageConstants.get('Reference Order'), enableCellEdit: false },
                 ];
                 return inventoryItemLotListGrid;
+            };
+            GridService.prototype.getOpenDeliveryListGrid = function () {
+                var openDeliveryListGrid = angular.copy(this.baseGrid);
+                var footerCellTemplateNumString = "<div class=\"ui-grid-cell-contents\" col-index=\"renderIndex\">Sum: {{ ( col.getAggregationValue() CUSTOM_FILTERS ) | number:2 }}</div>";
+                var gridLinkCellTemplate = "<div class=\"ui-grid-cell-contents\" title=\"TOOLTIP\"><span class=\"h5-link\" ng-click=\"grid.appScope.addressLabelModule.displayOpenDeliveryLabel(col.field, row.entity)\">{{COL_FIELD CUSTOM_FILTERS}}</span></div>";
+                openDeliveryListGrid.columnDefs = [
+                    { name: "OQRIDN", displayName: this.languageService.languageConstants.get('Order Number'), enableCellEdit: false, cellTemplate: gridLinkCellTemplate },
+                    { name: "OQDLIX", displayName: this.languageService.languageConstants.get('Delivery Number'), enableCellEdit: false },
+                    { name: "OQCONA", displayName: this.languageService.languageConstants.get('Consignee'), enableCellEdit: false },
+                    { name: "OKCUNM", displayName: this.languageService.languageConstants.get('Name'), enableCellEdit: false },
+                    { name: "OQDSDT", displayName: this.languageService.languageConstants.get('Departure Date'), enableCellEdit: false },
+                    { name: "OQPGRS", displayName: this.languageService.languageConstants.get('Delivery Stat'), enableCellEdit: false },
+                    { name: "OQPIST", displayName: this.languageService.languageConstants.get('Packing Stat'), enableCellEdit: false }
+                ];
+                return openDeliveryListGrid;
+            };
+            GridService.prototype.getDeliveryLineListGrid = function () {
+                var deliveryLineListGrid = angular.copy(this.baseGrid);
+                var footerCellTemplateNumString = "<div class=\"ui-grid-cell-contents\" col-index=\"renderIndex\">Sum: {{ ( col.getAggregationValue() CUSTOM_FILTERS ) | number:2 }}</div>";
+                var gridLinkCellTemplate = "<div class=\"ui-grid-cell-contents\" title=\"TOOLTIP\"><span class=\"h5-link\" ng-click=\"grid.appScope.addressLabelModule.displayOpenDeliveryLine(col.field, row.entity)\">{{COL_FIELD CUSTOM_FILTERS}}</span></div>";
+                deliveryLineListGrid.columnDefs = [
+                    { name: "URITNO", displayName: this.languageService.languageConstants.get('Item number'), enableCellEdit: false, cellTemplate: gridLinkCellTemplate },
+                    { name: "MMITDS", displayName: this.languageService.languageConstants.get('Name'), enableCellEdit: false },
+                    { name: "URTRQT", displayName: this.languageService.languageConstants.get('Trans Qty'), enableCellEdit: false },
+                    { name: "URRIDL", displayName: this.languageService.languageConstants.get('Order Line'), enableCellEdit: false },
+                ];
+                return deliveryLineListGrid;
             };
             GridService.prototype.getSampleGrid1 = function () {
                 var _this = this;

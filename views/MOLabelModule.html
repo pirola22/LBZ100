@@ -4,8 +4,14 @@
 			ng-model="modelobject.collapseUIGrid1"
 			ng-mousedown="modelobject.collapseUIGrid1=!modelobject.collapseUIGrid1">
 			<img class="h5-icon" ng-src="img/selection-icon.png"
-				title="{{::languageConstants.get('Heading')}}" alt="" />{{::languageConstants.get('MO
-			Details')}}
+				title="{{::languageConstants.get('MO Label')}}" alt="MO Label" />
+			<td><b> {{::languageConstants.get('MO Label')}} </b></td>
+
+			<table>
+				<tr>
+					<td >{{::languageConstants.get('MO Details')}}</td>
+				</tr>
+			</table>
 		</div>
 		<div class="table-responsive h5-padding-md" ng-if="!collapseSel">
 			<div class="row">

@@ -80,6 +80,9 @@ module h5.application {
             InventoryLabelModule: {
                 url: string;
             },
+            AddressLabelModule: {
+                url: string;
+            },
             errorModule: {
                 url: string;
             }
@@ -88,10 +91,11 @@ module h5.application {
         globalSelection: IGlobalSelection;
         MOLabelModule: IMOLabelModule;
         inventoryLabelModule: IInventoryLabelModule;
-        statusBar : IStatusBarObj[];
-        statusBarIsCollapsed : boolean;
-        statusBarVisible : boolean;
-        hasValidlicense : boolean;
-        
+        addressLabelModule: IAddressLabelModule;
+        statusBar: IStatusBarObj[];
+        statusBarIsCollapsed: boolean;
+        statusBarVisible: boolean;
+        hasValidlicense: boolean;
+
     }
 }
