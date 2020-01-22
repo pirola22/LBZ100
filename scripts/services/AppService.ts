@@ -13,7 +13,7 @@ module h5.application {
         getInventoryItemLotList(itemNumber: string): ng.IPromise<M3.IMIResponse>;
         getItem(itemNumber: string): ng.IPromise<M3.IMIResponse>;
         getLine(orderNumber: string, orderLine: string): ng.IPromise<M3.IMIResponse>;
-        getAddress(deliveryNumber: string): ng.IPromise<M3.IMIResponse>;
+        getAddress(orderNumber: string): ng.IPromise<M3.IMIResponse>;
         addXMLRecord(USD1: string, USD2: string, USD3: string, USD4: string, USD5: string, ITNO: string, USID: string): ng.IPromise<M3.IMIResponse>;
         addAddressXMLRecord(USD1: string, USD2: string, USD3: string, USD4: string, USD5: string, USID: string, tname: string, tcua1: string, tcua2: string, tcua3: string, popn: string, cuor: string): ng.IPromise<M3.IMIResponse>;
         chgAddressXMLRecord(USD1: string, USD2: string, USD3: string, USD4: string, USD5: string, USID: string, tname: string, tcua1: string, tcua2: string, tcua3: string, popn: string, cuor: string): ng.IPromise<M3.IMIResponse>;
@@ -173,13 +173,13 @@ module h5.application {
             }
             return this.restService.executeM3MIRestService("CMS100MI", "LstOpenDelivery", requestData, 0).then((val: M3.IMIResponse) => { return val; });
         }
-        public getAddress(deliveryNumber: string): ng.IPromise<M3.IMIResponse> {
+        public getAddress(OrderNumber: string): ng.IPromise<M3.IMIResponse> {
 
             let requestData = {
-                DLIX: deliveryNumber,
+                ORNO: OrderNumber,
                 ADRT: "02"
             }
-            return this.restService.executeM3MIRestService("MWS410MI", "GetAdr", requestData, 0).then((val: M3.IMIResponse) => { return val; });
+            return this.restService.executeM3MIRestService("OIS100MI", "GetAddress", requestData, 0).then((val: M3.IMIResponse) => { return val; });
         }
         public getDeliveryLineList(deliveryNumber: string): ng.IPromise<M3.IMIResponse> {
             let requestData = {

@@ -1128,7 +1128,9 @@ var h5;
                 this.appService.getLine(orderNumber, orderLine).then(function (val) {
                     _this.scope.addressLabelModule.popn = val.item.POPN;
                     _this.scope.addressLabelModule.cuor = val.item.CUOR;
-                    _this.scope.globalSelection.item = val.items;
+                    console.log("val----------------");
+                    console.log(val.item.POPN);
+                    _this.scope.globalSelection.item = val.item;
                     _this.scope.globalSelection.addressLabel = {
                         DLIX: deliveryNumber,
                         ITNO: itemNumber,
@@ -1454,49 +1456,52 @@ var h5;
             };
             AppController.prototype.updSuffix = function (facility, moNumber, itemNumber, warehouse, boxNumber, labelType, responsible, altUOM, lotNumber, workCenter, grossWeight, netWeight, altGrossWeight, altNetWeight, startingBox, scanQty, lastBox, labelsPerBox) {
                 var _this = this;
-                var ret = false;
-                console.log("in updSuffix");
+                var ret = true;
+                grossWeight = this.scope.globalSelection.MOLabel.ORQG;
+                netWeight = this.scope.globalSelection.MOLabel.ORQN;
                 this.scope.loadingData = true;
                 this.scope.globalSelection.transactionStatus.MOLabel = true;
                 this.appService.chgMOLabelSuffixAlpha(facility, moNumber, itemNumber, warehouse, boxNumber, altUOM, lotNumber, workCenter, labelType, responsible).then(function (val) {
-                    console.log("ALPHA CHANGED");
+                    console.log("sucess change 1");
                     _this.appService.chgMOLabelSuffixNumeric(facility, moNumber, itemNumber, warehouse, boxNumber, grossWeight, netWeight, altGrossWeight, altNetWeight, startingBox, scanQty, lastBox).then(function (val) {
                         _this.scope.globalSelection.transactionStatus.MOLabel = false;
-                        console.log("NUMERIC CHANGED");
+                        _this.refreshTransactionStatus();
+                        console.log("sucess change 2");
+                        _this.printMOLabel(labelType, facility, moNumber, boxNumber.toString(), itemNumber, _this.scope.userContext.m3User, _this.scope.globalSelection.printer.selected.DEV, labelsPerBox);
                     }, function (err) {
-                        console.log("****" + err.errorField);
-                        console.log("****" + err.errorMessage + " now in  chgMOLabelSuffixNumeric");
                         _this.scope.globalSelection.transactionStatus.MOLabel = false;
+                        _this.refreshTransactionStatus();
                         var error = "API: " + err.program + "." + err.transaction + ", Input: " + JSON.stringify(err.requestData) + ", Error Code: " + err.errorCode;
                         _this.showError(error, [err.errorMessage]);
                         _this.scope.statusBar.push({ message: error + " " + err.errorMessage, statusBarMessageType: h5.application.MessageType.Error, timestamp: new Date() });
                     });
                 }, function (err) {
-                    console.log("****" + err.errorMessage + " now in  add");
                     _this.scope.MOLabelModule.suffixExists = false;
                     _this.scope.globalSelection.transactionStatus.MOLabel = false;
-                    console.log(facility, moNumber, itemNumber, warehouse, boxNumber, altUOM, lotNumber, workCenter, labelType, responsible);
+                    _this.refreshTransactionStatus();
                     _this.appService.addMOLabelSuffixAlpha(facility, moNumber, itemNumber, warehouse, boxNumber, altUOM, lotNumber, workCenter, labelType, responsible).then(function (val) {
-                        console.log("in addMOLabelSuffixAlpha");
+                        console.log("sucess change 3");
                         _this.appService.addMOLabelSuffixNumeric(facility, moNumber, itemNumber, warehouse, boxNumber, grossWeight, netWeight, altGrossWeight, altNetWeight, startingBox, scanQty, lastBox).then(function (val) {
-                            console.log("in addMOLabelSuffixNumeric");
                             _this.scope.globalSelection.transactionStatus.MOLabel = false;
+                            _this.refreshTransactionStatus();
+                            console.log("sucess change 4");
+                            _this.printMOLabel(labelType, facility, moNumber, boxNumber.toString(), itemNumber, _this.scope.userContext.m3User, _this.scope.globalSelection.printer.selected.DEV, labelsPerBox);
                         }, function (err) {
-                            console.log("1598 " + err.errorMessage);
                             _this.scope.globalSelection.transactionStatus.MOLabel = false;
+                            _this.refreshTransactionStatus();
                             var error = "API: " + err.program + "." + err.transaction + ", Input: " + JSON.stringify(err.requestData) + ", Error Code: " + err.errorCode;
                             _this.showError(error, [err.errorMessage]);
                             _this.scope.statusBar.push({ message: error + " " + err.errorMessage, statusBarMessageType: h5.application.MessageType.Error, timestamp: new Date() });
                         });
                     }, function (err) {
-                        console.log("1606 " + err.errorMessage);
                         _this.scope.globalSelection.transactionStatus.MOLabel = false;
+                        _this.refreshTransactionStatus();
                         var error = "API: " + err.program + "." + err.transaction + ", Input: " + JSON.stringify(err.requestData) + ", Error Code: " + err.errorCode;
                         _this.showError(error, [err.errorMessage]);
                         _this.scope.statusBar.push({ message: error + " " + err.errorMessage, statusBarMessageType: h5.application.MessageType.Error, timestamp: new Date() });
                     });
                 }).finally(function () {
-                    _this.printMOLabel(labelType, facility, moNumber, boxNumber.toString(), itemNumber, _this.scope.userContext.m3User, _this.scope.globalSelection.printer.selected.DEV, labelsPerBox);
+                    console.log("in finally");
                     _this.refreshTransactionStatus();
                 });
                 return ret;
@@ -1714,24 +1719,30 @@ var h5;
                 var tcua2 = "";
                 var tcua3 = "";
                 var itemNumber = this.scope.addressLabelModule.itemNumber;
-                this.appService.getAddress(dlix).then(function (val) {
-                    tname = val.item.NAME.substring(0, 30);
-                    tcua1 = val.item.ADR1.substring(0, 30);
-                    tcua2 = val.item.ADR2.substring(0, 30);
-                    tcua3 = val.item.ADR3.substring(0, 30);
+                this.appService.getAddress(ridn).then(function (val) {
+                    console.log("------------------------val.item--Address-------------------- ");
+                    console.log(val);
+                    tname = val.item.CUNM.substring(0, 30);
+                    tcua1 = val.item.CUA1.substring(0, 30);
+                    tcua2 = val.item.CUA2.substring(0, 30);
+                    tcua3 = val.item.CUA3.substring(0, 30);
+                    console.log(tname + "  " + tcua1 + "  " + tcua2 + "  " + tcua3);
                     var popn = _this.scope.globalSelection.addressLabel.POPN;
                     var cuor = _this.scope.globalSelection.addressLabel.CUOR;
+                    console.log(popn + "<  popn" + cuor + "<  cuor");
                     _this.appService.addAddressXMLRecord(warehouse, ridn, ridl, dlix, ridx, userID, tname, tcua1, tcua2, tcua3, popn, cuor).then(function (val) {
                         for (var y = 1; y <= labelsPerBox; y++) {
                             _this.callAddressLabelPrint(itemNumber, printer, ridn, ridl, dlix, ridx, labelsPerBox);
                         }
                     }, function (err) {
+                        _this.scope.globalSelection.transactionStatus.addressLabel = false;
                         _this.appService.chgAddressXMLRecord(warehouse, ridn, ridl, dlix, ridx, userID, tname, tcua1, tcua2, tcua3, popn, cuor).then(function (val) {
                             console.log("XML record SAVED  ");
                             for (var y = 1; y <= labelsPerBox; y++) {
                                 _this.callAddressLabelPrint(itemNumber, printer, ridn, ridl, dlix, ridx, labelsPerBox);
                             }
                         }, function (err) {
+                            _this.scope.globalSelection.transactionStatus.addressLabel = false;
                             console.log("Failed to add and save XMLPRT");
                             var error = "API: " + err.program + "." + err.transaction + ", Input: " + JSON.stringify(err.requestData) + ", Error Code: " + err.errorCode;
                             _this.showError(error, [err.errorMessage]);
@@ -1845,15 +1856,16 @@ var h5;
                 }
                 for (var x = 1; x <= numOfBoxes; x++) {
                     sfxBANO = lotNumber + this.padBoxNumber(boxNum.toString());
-                    this.updMOLabel(facility, moNumber, itemNumber, warehouse, description, workCenter, tradeName, UOM, labelType, compound, color, MSD, info, lotNumber, startingBox);
-                    console.log("PRINTED MOLABEL ");
+                    console.log("IN UPDSFX LOOP ");
                     if (this.updSuffix(facility, moNumber, itemNumber, warehouse, boxNum, labelType, responsible, altUOM, sfxBANO, workCenter, grossWeight, netWeight, altGrossWeight, altNetWeight, startingBox, scanQty, lastBox, labelsPerBox)) {
-                        console.log("********                 UPDATEDLBLSFX ");
+                        if (x === numOfBoxes) {
+                            this.updMOLabel(facility, moNumber, itemNumber, warehouse, description, workCenter, tradeName, UOM, labelType, compound, color, MSD, info, lotNumber, boxNum);
+                            console.log(" updMOLabel---------------------------------> ");
+                        }
+                        console.log(grossWeight + " grossWeight ********                 UPDATEDLBLSFX count = " + x);
                     }
                     boxNum++;
                 }
-                console.log("AFTER LOOP UPDATE MOLABEL NEXT");
-                this.updMOLabel(facility, moNumber, itemNumber, warehouse, description, workCenter, tradeName, UOM, labelType, compound, color, MSD, info, lotNumber, boxNum);
                 this.closeModalWindow();
             };
             AppController.prototype.updPrinterFile = function () {

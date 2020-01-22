@@ -1326,7 +1326,7 @@ module h5.application {
             this.scope.globalSelection.openDeliveryList = true;
             this.appService.getOpenDeliveryList(warehouse).then((val: M3.IMIResponse) => {
                 this.scope.globalSelection.openDeliveryList = val.items;
-console.log(val);
+                console.log(val);
                 val.items.forEach((value: any) => {
                     val.items[count].OQDSDT = this.formatDatePerUserSetting(value.OQDSDT);
                     if (value.OKCUNM === "") {
@@ -1463,9 +1463,11 @@ console.log(val);
 
             // call API'S to get customer info
             this.appService.getLine(orderNumber, orderLine).then((val: M3.IMIResponse) => {
-                this.scope.addressLabelModule.popn = val.item.POPN;
+                 this.scope.addressLabelModule.popn = val.item.POPN;
                 this.scope.addressLabelModule.cuor = val.item.CUOR;
-                this.scope.globalSelection.item = val.items;
+                console.log("val----------------" );
+                console.log( val.item.POPN);
+                this.scope.globalSelection.item = val.item;
                 //set field to api results
                 this.scope.globalSelection.addressLabel = {
                     DLIX: deliveryNumber,
@@ -1852,59 +1854,59 @@ console.log(val);
 
         private updSuffix(facility: string, moNumber: string, itemNumber: string, warehouse: string, boxNumber: string, labelType: string, responsible: string, altUOM: string, lotNumber: string,
             workCenter: string, grossWeight: string, netWeight: string, altGrossWeight: string, altNetWeight: string, startingBox: string, scanQty: string, lastBox: string, labelsPerBox: any): boolean {
-            let ret = false;
-            console.log("in updSuffix");
+            let ret = true;
+             grossWeight = this.scope.globalSelection.MOLabel.ORQG;
+                netWeight = this.scope.globalSelection.MOLabel.ORQN;
             this.scope.loadingData = true;
             this.scope.globalSelection.transactionStatus.MOLabel = true;
-
             this.appService.chgMOLabelSuffixAlpha(facility, moNumber, itemNumber, warehouse, boxNumber, altUOM, lotNumber, workCenter, labelType, responsible).then((val: M3.IMIResponse) => {
-                console.log("ALPHA CHANGED");
+                console.log("sucess change 1");
                 this.appService.chgMOLabelSuffixNumeric(facility, moNumber, itemNumber, warehouse, boxNumber, grossWeight, netWeight, altGrossWeight, altNetWeight, startingBox, scanQty, lastBox).then((val: M3.IMIResponse) => {
                     this.scope.globalSelection.transactionStatus.MOLabel = false;
-                    // this.refreshTransactionStatus();
-                    console.log("NUMERIC CHANGED");
+                    this.refreshTransactionStatus();
+
+                    console.log("sucess change 2");
+                        this.printMOLabel(labelType, facility, moNumber, boxNumber.toString(), itemNumber, this.scope.userContext.m3User, this.scope.globalSelection.printer.selected.DEV, labelsPerBox);
                 }, (err: M3.IMIResponse) => {
-                    console.log("****" + err.errorField);
-                    console.log("****" + err.errorMessage + " now in  chgMOLabelSuffixNumeric");
                     this.scope.globalSelection.transactionStatus.MOLabel = false;
-                    // this.refreshTransactionStatus();
+                    this.refreshTransactionStatus();
                     let error = "API: " + err.program + "." + err.transaction + ", Input: " + JSON.stringify(err.requestData) + ", Error Code: " + err.errorCode;
                     this.showError(error, [err.errorMessage]);
                     this.scope.statusBar.push({ message: error + " " + err.errorMessage, statusBarMessageType: h5.application.MessageType.Error, timestamp: new Date() });
                 });
 
             }, (err: M3.IMIResponse) => {
-                console.log("****" + err.errorMessage + " now in  add");
                 this.scope.MOLabelModule.suffixExists = false;
                 this.scope.globalSelection.transactionStatus.MOLabel = false;
-                // this.refreshTransactionStatus();
-                console.log(facility, moNumber, itemNumber, warehouse, boxNumber, altUOM, lotNumber, workCenter, labelType, responsible);
+                this.refreshTransactionStatus();
                 this.appService.addMOLabelSuffixAlpha(facility, moNumber, itemNumber, warehouse, boxNumber, altUOM, lotNumber, workCenter, labelType, responsible).then((val: M3.IMIResponse) => {
-                    console.log("in addMOLabelSuffixAlpha");
+                    console.log("sucess change 3");
                     this.appService.addMOLabelSuffixNumeric(facility, moNumber, itemNumber, warehouse, boxNumber, grossWeight, netWeight, altGrossWeight, altNetWeight, startingBox, scanQty, lastBox).then((val: M3.IMIResponse) => {
-                        console.log("in addMOLabelSuffixNumeric");
                         this.scope.globalSelection.transactionStatus.MOLabel = false;
-                        //  this.refreshTransactionStatus();
+                        this.refreshTransactionStatus();
+
+                        console.log("sucess change 4");
+                            this.printMOLabel(labelType, facility, moNumber, boxNumber.toString(), itemNumber, this.scope.userContext.m3User, this.scope.globalSelection.printer.selected.DEV, labelsPerBox);
                     }, (err: M3.IMIResponse) => {
-                        console.log("1598 " + err.errorMessage);
                         this.scope.globalSelection.transactionStatus.MOLabel = false;
-                        ///  this.refreshTransactionStatus();
+                        this.refreshTransactionStatus();
                         let error = "API: " + err.program + "." + err.transaction + ", Input: " + JSON.stringify(err.requestData) + ", Error Code: " + err.errorCode;
                         this.showError(error, [err.errorMessage]);
                         this.scope.statusBar.push({ message: error + " " + err.errorMessage, statusBarMessageType: h5.application.MessageType.Error, timestamp: new Date() });
                     });
                 }, (err: M3.IMIResponse) => {
-                    console.log("1606 " + err.errorMessage);
                     this.scope.globalSelection.transactionStatus.MOLabel = false;
-                    // this.refreshTransactionStatus();
+                    this.refreshTransactionStatus();
                     let error = "API: " + err.program + "." + err.transaction + ", Input: " + JSON.stringify(err.requestData) + ", Error Code: " + err.errorCode;
                     this.showError(error, [err.errorMessage]);
                     this.scope.statusBar.push({ message: error + " " + err.errorMessage, statusBarMessageType: h5.application.MessageType.Error, timestamp: new Date() });
                 });
             }).finally(() => {
-                // console.log(labelsPerBox);
-                this.printMOLabel(labelType, facility, moNumber, boxNumber.toString(), itemNumber, this.scope.userContext.m3User, this.scope.globalSelection.printer.selected.DEV, labelsPerBox);
+                console.log("in finally");
+            //    this.printMOLabel(labelType, facility, moNumber, boxNumber.toString(), itemNumber, this.scope.userContext.m3User, this.scope.globalSelection.printer.selected.DEV, labelsPerBox);
+
                 this.refreshTransactionStatus();//must be in both statements IF NOT IN FINALLY
+
             });
             return ret;
         }
@@ -2174,27 +2176,34 @@ console.log(val);
             let tcua2 = "";
             let tcua3 = "";
             let itemNumber = this.scope.addressLabelModule.itemNumber;
-            this.appService.getAddress(dlix).then((val: M3.IMIResponse) => {
-                tname = val.item.NAME.substring(0, 30);
-                tcua1 = val.item.ADR1.substring(0, 30);
-                tcua2 = val.item.ADR2.substring(0, 30);
-                tcua3 = val.item.ADR3.substring(0, 30);
+            this.appService.getAddress(ridn).then((val: M3.IMIResponse) => {
+                  console.log("------------------------val.item--Address-------------------- " );
+                   console.log(  val );
+                tname = val.item.CUNM.substring(0, 30);
+                tcua1 = val.item.CUA1.substring(0, 30);
+                tcua2 = val.item.CUA2.substring(0, 30);
+                tcua3 = val.item.CUA3.substring(0, 30);
+                console.log(  tname + "  " + tcua1+ "  " +tcua2+ "  "+ tcua3);
                 // trim to 30 chracters (max size allowed
 
-                let popn = this.scope.globalSelection.addressLabel.POPN;
-                let cuor = this.scope.globalSelection.addressLabel.CUOR;
+                 let popn = this.scope.globalSelection.addressLabel.POPN;
+                 let cuor = this.scope.globalSelection.addressLabel.CUOR;
+                console.log(  popn + "<  popn" + cuor+ "<  cuor" );
+              
                 //Add / Save Record
                 this.appService.addAddressXMLRecord(warehouse, ridn, ridl, dlix, ridx, userID, tname, tcua1, tcua2, tcua3, popn, cuor).then((val: M3.IMIResponse) => {
                     for (let y = 1; y <= labelsPerBox; y++) {
                         this.callAddressLabelPrint(itemNumber, printer, ridn, ridl, dlix, ridx, labelsPerBox);
                     }
                 }, (err: M3.IMIResponse) => {
+                    this.scope.globalSelection.transactionStatus.addressLabel = false;
                     this.appService.chgAddressXMLRecord(warehouse, ridn, ridl, dlix, ridx, userID, tname, tcua1, tcua2, tcua3, popn, cuor).then((val: M3.IMIResponse) => {
                         console.log("XML record SAVED  ");
                         for (let y = 1; y <= labelsPerBox; y++) {
                             this.callAddressLabelPrint(itemNumber, printer, ridn, ridl, dlix, ridx, labelsPerBox);
                         }
                     }, (err: M3.IMIResponse) => {
+                        this.scope.globalSelection.transactionStatus.addressLabel = false;
                         console.log("Failed to add and save XMLPRT");
                         let error = "API: " + err.program + "." + err.transaction + ", Input: " + JSON.stringify(err.requestData) + ", Error Code: " + err.errorCode;
                         this.showError(error, [err.errorMessage]);
@@ -2203,7 +2212,7 @@ console.log(val);
                 }).finally(() => {
                     this.refreshTransactionStatus();//must be in both statements IF NOT IN FINALLY
 
-                });
+                });  
                 this.scope.globalSelection.transactionStatus.addressLabel = false;
                 this.loadMOList(warehouse); //reload
             }, (err: M3.IMIResponse) => {
@@ -2325,21 +2334,23 @@ console.log(val);
             }
             //outer loop
             for (let x = 1; x <= numOfBoxes; x++) {
+
                 // inner loop prints the MOLabels per side   
                 sfxBANO = lotNumber + this.padBoxNumber(boxNum.toString());
-                //console.log("sfx bano = " + sfxBANO);
-                this.updMOLabel(facility, moNumber, itemNumber, warehouse, description, workCenter, tradeName, UOM, labelType, compound, color, MSD, info, lotNumber, startingBox);
-                // this.printMOLabel(labelType, facility, moNumber, boxNumber.toString(), itemNumber, this.scope.userContext.m3User, this.scope.globalSelection.printer.selected.DEV, labelsPerBox);
-                //this.printMOLabel(labelType, facility, moNumber, startingBox.toString(), itemNumber, this.scope.userContext.m3User, this.scope.globalSelection.printer.selected.DEV, labelsPerBox);
-                console.log("PRINTED MOLABEL ");
+                console.log("IN UPDSFX LOOP ");
                 if (this.updSuffix(facility, moNumber, itemNumber, warehouse, boxNum, labelType, responsible, altUOM, sfxBANO,
                     workCenter, grossWeight, netWeight, altGrossWeight, altNetWeight, startingBox, scanQty, lastBox, labelsPerBox)) {
-                    console.log("********                 UPDATEDLBLSFX ");
+                    if (x === numOfBoxes) {
+                        this.updMOLabel(facility, moNumber, itemNumber, warehouse, description, workCenter, tradeName, UOM, labelType, compound, color, MSD, info, lotNumber, boxNum);
+                        console.log(" updMOLabel---------------------------------> ");
+                    }
+                    console.log(grossWeight + " grossWeight ********                 UPDATEDLBLSFX count = " + x);
                 }
+
                 boxNum++;
             }
-            console.log("AFTER LOOP UPDATE MOLABEL NEXT");
-            this.updMOLabel(facility, moNumber, itemNumber, warehouse, description, workCenter, tradeName, UOM, labelType, compound, color, MSD, info, lotNumber, boxNum);
+
+            //           this.updMOLabel(facility, moNumber, itemNumber, warehouse, description, workCenter, tradeName, UOM, labelType, compound, color, MSD, info, lotNumber, boxNum);
 
 
             this.closeModalWindow();

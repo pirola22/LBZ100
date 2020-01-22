@@ -115,12 +115,12 @@ var h5;
                 };
                 return this.restService.executeM3MIRestService("CMS100MI", "LstOpenDelivery", requestData, 0).then(function (val) { return val; });
             };
-            AppService.prototype.getAddress = function (deliveryNumber) {
+            AppService.prototype.getAddress = function (OrderNumber) {
                 var requestData = {
-                    DLIX: deliveryNumber,
+                    ORNO: OrderNumber,
                     ADRT: "02"
                 };
-                return this.restService.executeM3MIRestService("MWS410MI", "GetAdr", requestData, 0).then(function (val) { return val; });
+                return this.restService.executeM3MIRestService("OIS100MI", "GetAddress", requestData, 0).then(function (val) { return val; });
             };
             AppService.prototype.getDeliveryLineList = function (deliveryNumber) {
                 var requestData = {
