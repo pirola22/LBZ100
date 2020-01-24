@@ -2191,13 +2191,13 @@ module h5.application {
                 console.log(  popn + "<  popn" + cuor+ "<  cuor" );
               
                 //Add / Save Record
-                this.appService.addAddressXMLRecord(warehouse, ridn, ridl, dlix, ridx, userID, tname, tcua1, tcua2, tcua3, popn, cuor).then((val: M3.IMIResponse) => {
+                this.appService.addAddressXMLRecord(itemNumber, ridn, ridl, dlix, ridx, userID, tname, tcua1, tcua2, tcua3, popn, cuor).then((val: M3.IMIResponse) => {
                     for (let y = 1; y <= labelsPerBox; y++) {
                         this.callAddressLabelPrint(itemNumber, printer, ridn, ridl, dlix, ridx, labelsPerBox);
                     }
                 }, (err: M3.IMIResponse) => {
                     this.scope.globalSelection.transactionStatus.addressLabel = false;
-                    this.appService.chgAddressXMLRecord(warehouse, ridn, ridl, dlix, ridx, userID, tname, tcua1, tcua2, tcua3, popn, cuor).then((val: M3.IMIResponse) => {
+                    this.appService.chgAddressXMLRecord(itemNumber, ridn, ridl, dlix, ridx, userID, tname, tcua1, tcua2, tcua3, popn, cuor).then((val: M3.IMIResponse) => {
                         console.log("XML record SAVED  ");
                         for (let y = 1; y <= labelsPerBox; y++) {
                             this.callAddressLabelPrint(itemNumber, printer, ridn, ridl, dlix, ridx, labelsPerBox);

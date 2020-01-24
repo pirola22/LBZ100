@@ -1730,13 +1730,13 @@ var h5;
                     var popn = _this.scope.globalSelection.addressLabel.POPN;
                     var cuor = _this.scope.globalSelection.addressLabel.CUOR;
                     console.log(popn + "<  popn" + cuor + "<  cuor");
-                    _this.appService.addAddressXMLRecord(warehouse, ridn, ridl, dlix, ridx, userID, tname, tcua1, tcua2, tcua3, popn, cuor).then(function (val) {
+                    _this.appService.addAddressXMLRecord(itemNumber, ridn, ridl, dlix, ridx, userID, tname, tcua1, tcua2, tcua3, popn, cuor).then(function (val) {
                         for (var y = 1; y <= labelsPerBox; y++) {
                             _this.callAddressLabelPrint(itemNumber, printer, ridn, ridl, dlix, ridx, labelsPerBox);
                         }
                     }, function (err) {
                         _this.scope.globalSelection.transactionStatus.addressLabel = false;
-                        _this.appService.chgAddressXMLRecord(warehouse, ridn, ridl, dlix, ridx, userID, tname, tcua1, tcua2, tcua3, popn, cuor).then(function (val) {
+                        _this.appService.chgAddressXMLRecord(itemNumber, ridn, ridl, dlix, ridx, userID, tname, tcua1, tcua2, tcua3, popn, cuor).then(function (val) {
                             console.log("XML record SAVED  ");
                             for (var y = 1; y <= labelsPerBox; y++) {
                                 _this.callAddressLabelPrint(itemNumber, printer, ridn, ridl, dlix, ridx, labelsPerBox);

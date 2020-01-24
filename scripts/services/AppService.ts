@@ -225,12 +225,12 @@ module h5.application {
             return this.restService.executeM3MIRestService("CUSEXTMI", "AddFieldValue", requestData).then((val: M3.IMIResponse) => { return val; });
 
         }
-        addAddressXMLRecord(USD1: string, USD2: string, USD3: string, USD4: string, USD5: string, USID: string, tname: string, tcua1: string, tcua2: string, tcua3: string, popn: string, cuor: string ): ng.IPromise<M3.IMIResponse> {
+        addAddressXMLRecord(USD1: string, USD2: string, USD3: string, USD4: string, USD5: string, USID: string, tname: string, tcua1: string, tcua2: string, tcua3: string, popn: string, cuor: string): ng.IPromise<M3.IMIResponse> {
 
             let requestData = {
-                   FILE: "XMLPRT",
+                FILE: "XMLPRT",
                 PK01: "T03",
-                PK02: "T03",
+                PK02: USD1,
                 PK03: USD2,
                 PK04: USD3,
                 PK05: USD4,
@@ -252,12 +252,12 @@ module h5.application {
             return this.restService.executeM3MIRestService("CUSEXTMI", "AddFieldValue", requestData).then((val: M3.IMIResponse) => { return val; });
 
         }
-        chgAddressXMLRecord(USD1: string, USD2: string, USD3: string, USD4: string, USD5: string, USID: string, tname: string, tcua1: string, tcua2: string, tcua3: string, popn: string,cuor: string): ng.IPromise<M3.IMIResponse> {
+        chgAddressXMLRecord(USD1: string, USD2: string, USD3: string, USD4: string, USD5: string, USID: string, tname: string, tcua1: string, tcua2: string, tcua3: string, popn: string, cuor: string): ng.IPromise<M3.IMIResponse> {
 
             let requestData = {
-                  FILE: "XMLPRT",
+                FILE: "XMLPRT",
                 PK01: "T03",
-                PK02: "T03",
+                PK02: USD1,
                 PK03: USD2,
                 PK04: USD3,
                 PK05: USD4,

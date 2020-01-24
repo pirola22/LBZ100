@@ -164,7 +164,7 @@ var h5;
                 var requestData = {
                     FILE: "XMLPRT",
                     PK01: "T03",
-                    PK02: "T03",
+                    PK02: USD1,
                     PK03: USD2,
                     PK04: USD3,
                     PK05: USD4,
@@ -187,7 +187,7 @@ var h5;
                 var requestData = {
                     FILE: "XMLPRT",
                     PK01: "T03",
-                    PK02: "T03",
+                    PK02: USD1,
                     PK03: USD2,
                     PK04: USD3,
                     PK05: USD4,
